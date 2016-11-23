@@ -1,2 +1,35 @@
 # result-export
 Tool to export a single test result in different formats
+
+### Build
+
+`make.sh`
+
+### Usage
+
+`java -jar ResultExport.jar <path to config file> <resultFormat> <resultID>`
+
+* `resultFormat`: type of the result format, `excel`, `html`, or `diag`
+* `resultID`: the unique ID of the test result. For instance, the result ID is **12345** in the url `http://swathub.com/app/support/samples/results/12345`
+
+### Config file
+
+#### Config parameters
+
+* `serverUrl`: the URL of SWATHub Server URL, such as http://www.swathub.com/
+* `username`: the username of SWATHub Server
+* `apiKey`: the api key for the user, same as the key for execution node
+* `workspaceOwner`: the owner's username of the target workspace to export
+* `workspaceName`: the name of the target workspace
+
+#### Sample config file
+
+```
+{
+  "serverUrl": "http://swathub.com/",
+  "username": "tester",
+  "apiKey": "A7185B82DB6A4EFC9006",
+  "workspaceOwner": "support",
+  "workspaceName": "samples"
+}
+```
