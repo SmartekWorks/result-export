@@ -4,8 +4,5 @@
   "apiKey": "",
   "workspaceOwner": "",
   "workspaceName": "",
-  "setID": "",
-  "tags":"",
-  "status": ["finished", "failed", "ok", "ng"],
-  "platforms": []
+  "lang": ""
 }

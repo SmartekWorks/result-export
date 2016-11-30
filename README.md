@@ -21,6 +21,7 @@ Tool to export a single test result in different formats
 * `apiKey`: the api key for the user, same as the key for execution node
 * `workspaceOwner`: the owner's username of the target workspace to export
 * `workspaceName`: the name of the target workspace
+* `locale`: the locale to fetch the test result, supporting `en`, `ja` and `zh_cn`
 
 #### Sample config file
 
@@ -30,6 +31,7 @@ Tool to export a single test result in different formats
   "username": "tester",
   "apiKey": "A7185B82DB6A4EFC9006",
   "workspaceOwner": "support",
-  "workspaceName": "samples"
+  "workspaceName": "samples",
+  "locale": "en"
 }
 ```
