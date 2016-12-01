@@ -433,7 +433,7 @@ public class ResultExport {
 								image = ImageIO.read(imageUrl);
 							} catch (IIOException e) {
 								System.out.println("Image URL may not exist:" + imageUrl.toString());
-								break;
+								continue;
 							}
 							ByteArrayOutputStream baos = new ByteArrayOutputStream();
 							ImageIO.write(image, "png", baos);
