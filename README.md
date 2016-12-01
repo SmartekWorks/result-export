@@ -1,5 +1,9 @@
-# result-export
-Tool to export a single test result in different formats
+##  Result Export Tool
+
+A desktop tool to export a single test result into different formats.
+* `excel`: an Excel file with all the screenshots and parameters
+* `html`: a zip file with all the page HTML files
+* `diag`: a zip file with all evidences and page knowledges for diagnosis
 
 ### Build
 

@@ -109,7 +109,7 @@ public class ResultExport {
 		valueMap.put("zh_cn.comment", "注释");
 		valueMap.put("zh_cn.url", "URL");
 	}
-	private static String ROOT_PATH = "/swathub/api/";
+	private static String ROOT_PATH = "/api/";
 
 	private static String apiGet(URIBuilder url, String user, String pass) throws Exception {
 		CredentialsProvider credsProvider = new BasicCredentialsProvider();
