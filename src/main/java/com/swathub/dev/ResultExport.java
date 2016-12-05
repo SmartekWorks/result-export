@@ -174,6 +174,7 @@ public class ResultExport {
 
 		HSSFCellStyle cellDisabled =  workbook.createCellStyle();
 		cellDisabled.setFillForegroundColor(IndexedColors.GREY_50_PERCENT.getIndex());
+		cellDisabled.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 		cellDisabled.setBorderBottom(BorderStyle.THIN);
 		cellDisabled.setBottomBorderColor(IndexedColors.BLACK.getIndex());
 		cellDisabled.setBorderLeft(BorderStyle.THIN);
@@ -326,7 +327,7 @@ public class ResultExport {
 							HSSFPatriarch drawing = sheet.createDrawingPatriarch();
 
 							HSSFClientAnchor anchor = creationHelper.createClientAnchor();
-							anchor.setCol1(0);
+							anchor.setCol1(1);
 							anchor.setRow1(rowCnt);
 							HSSFPicture picture = drawing.createPicture(anchor, pictureIdx);
 							picture.resize();
