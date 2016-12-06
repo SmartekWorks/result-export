@@ -186,6 +186,7 @@ public class ResultExport {
 
 		HSSFCellStyle lineDisabled =  workbook.createCellStyle();
 		lineDisabled.setFillForegroundColor(IndexedColors.GREY_50_PERCENT.getIndex());
+		lineDisabled.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 
 		for (int i = 0; i < steps.length(); i++) {
 			JSONObject step = steps.getJSONObject(i);
@@ -518,7 +519,7 @@ public class ResultExport {
 			HSSFSheet resultSheet = workbook.createSheet("Result");
 
 			// set basic information
-			int rowCnt = 0;
+			int rowCnt = 1;
 
 			resultSheet.setColumnWidth(0, 4500);
 			resultSheet.setColumnWidth(1, 4500);
