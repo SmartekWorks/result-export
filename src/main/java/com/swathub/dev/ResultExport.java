@@ -238,7 +238,7 @@ public class ResultExport {
 				} else {
 					row.createCell(0).setCellValue(step.getString("seqNo"));
 					row.createCell(1).setCellValue(valueMap.get(locale + ".name"));
-					row.getCell(1).setCellStyle(lineDisabled);
+					row.getCell(0).setCellStyle(lineDisabled);
 					row.createCell(2).setCellValue(title);
 				}
 
