@@ -16,6 +16,10 @@ A desktop tool to export a single test result into different formats.
 * `resultFormat`: type of the result format, `excel`, `html`, or `diag`
 * `resultID`: the unique ID of the test result. For instance, the result ID is **12345** in the url `http://swathub.com/app/support/samples/results/12345`
 
+**Hint**: if the size of the test result is quite large, please adjust the JVM arguments to increase the heap size. For instance:
+
+`java -Xms1024m -Xmx1024m -jar ResultExport.jar <path to config file> <resultFormat> <resultID>`
+
 ### Config file
 
 #### Config parameters
