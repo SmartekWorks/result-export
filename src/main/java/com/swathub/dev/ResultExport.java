@@ -519,7 +519,7 @@ public class ResultExport {
 			HSSFSheet resultSheet = workbook.createSheet("Result");
 
 			// set basic information
-			int rowCnt = 1;
+			int rowCnt = 0;
 
 			resultSheet.setColumnWidth(0, 4500);
 			resultSheet.setColumnWidth(1, 4500);
@@ -538,7 +538,7 @@ public class ResultExport {
 			HSSFCellStyle errorStyle = workbook.createCellStyle();
 			errorStyle.setFont(errorFont);
 
-			HSSFRow row = resultSheet.createRow(rowCnt);
+			HSSFRow row = resultSheet.createRow(rowCnt++);
 			row.createCell(0).setCellValue(valueMap.get(locale + ".scenario"));
 			row.getCell(0).setCellStyle(titleStyle);
 			row.createCell(1).setCellValue(summary.getString("scenarioName"));
