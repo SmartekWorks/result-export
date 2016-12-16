@@ -1,3 +1,3 @@
 #!/bin/bash
 mvn package
-mv ./target/result-export-1.0-jar-with-dependencies.jar ./ResultExport.jar
+mv ./target/result-export-2.0-jar-with-dependencies.jar ./ResultExport.jar

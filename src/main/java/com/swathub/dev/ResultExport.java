@@ -5,6 +5,7 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
@@ -476,31 +477,12 @@ public class ResultExport {
 		}
 	}
 
-	public static void main(String[] args) throws Exception {
-
-		if (args.length != 3) {
-			System.out.println("Usage: java -jar ResultExport.jar <config file> <format> <target path>");
-			return;
-		}
-
-		File configFile = new File(args[0]);
-		if (!configFile.exists() || configFile.isDirectory()) {
-			System.out.println("Config file is not exist.");
-			return;
-		}
-
-		String format = args[1];
-		if (!"excel".equals(format) && !"html".equals(format) && !"diag".equals(format)) {
-			System.out.println("Format must be one of the following: excel, html, diag");
-			return;
-		}
-
-		JSONObject config = new JSONObject(FileUtils.readFileToString(configFile, "UTF-8"));
+	private static void createFile(String format, JSONObject config, String resultId) throws Exception{
 		String locale = config.getString("locale");
 
 		URIBuilder apiURL = new URIBuilder(config.getString("serverUrl"));
 		apiURL.setPath(ROOT_PATH + config.getString("workspaceOwner") + "/" +
-				config.getString("workspaceName") + "/results/" + args[2]);
+				config.getString("workspaceName") + "/results/" + resultId);
 		apiURL.addParameter("lang", locale);
 
 		String apiResult = apiGet(apiURL, config.getString("username"), config.getString("apiKey"));
@@ -610,9 +592,9 @@ public class ResultExport {
 			workbook.write(outputStream);
 
 			FileUtils.writeByteArrayToFile(new File(summary.getString("scenarioName") +
-					"-" + summary.getString("caseName") + "-" + args[2] + ".xls"), outputStream.toByteArray());
+					"-" + summary.getString("caseName") + "-" + resultId + ".xls"), outputStream.toByteArray());
 			outputStream.close();
-			System.out.println("Excel file is created.");
+			System.out.println("Excel file is created. Result ID:" + resultId);
 		} else if ("html".equals(format)) {
 			ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
 			ZipArchiveOutputStream archive = new ZipArchiveOutputStream(byteOut);
@@ -625,11 +607,11 @@ public class ResultExport {
 
 			byteOut.flush();
 			FileOutputStream fop = new FileOutputStream(summary.getString("scenarioName") +
-					"-" + summary.getString("caseName") + "-" + args[2] + ".zip");
+					"-" + summary.getString("caseName") + "-" + resultId + ".zip");
 			byteOut.writeTo(fop);
 			byteOut.close();
 			fop.close();
-			System.out.println("Html zip file is created.");
+			System.out.println("Html zip file is created. Result ID:" + resultId);
 		} else if ("diag".equals(format)) {
 			ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
 			ZipArchiveOutputStream archive = new ZipArchiveOutputStream(byteOut);
@@ -648,14 +630,101 @@ public class ResultExport {
 			byteOut.flush();
 
 			FileOutputStream fop = new FileOutputStream("diag-" + summary.getString("scenarioName") +
-					"-" + summary.getString("caseName") + "-" + args[2] + ".zip");
+					"-" + summary.getString("caseName") + "-" + resultId + ".zip");
 			byteOut.writeTo(fop);
 			byteOut.close();
 			fop.close();
-			System.out.println("Diagnosis zip file is created.");
-		} else {
-			System.out.println("Format must be one of the following: excel, html, diag");
+			System.out.println("Diagnosis zip file is created. Result ID:" + resultId);
 		}
 	}
 
+	public static void main(String[] args) throws Exception {
+
+		if (args.length != 3) {
+			System.out.println("Usage: java -jar ResultExport.jar <config file> <format> <target file>");
+			return;
+		}
+
+		File configFile = new File(args[0]);
+		if (!configFile.exists() || configFile.isDirectory()) {
+			System.out.println("Config file is not exist.");
+			return;
+		}
+
+		String format = args[1];
+		if (!"excel".equals(format) && !"html".equals(format) && !"diag".equals(format)) {
+			System.out.println("Format must be one of the following: excel, html, diag");
+			return;
+		}
+
+		File targetFile = new File(args[2]);
+		if (!targetFile.exists() || targetFile.isDirectory()) {
+			System.out.println("Target file is not exist.");
+			return;
+		}
+
+		JSONObject config = new JSONObject(FileUtils.readFileToString(configFile, "UTF-8"));
+		JSONObject target = new JSONObject(FileUtils.readFileToString(targetFile, "UTF-8"));
+		ArrayList<String> validResults = new ArrayList<String>();
+
+		if (target.has("ids") && target.getJSONArray("ids").length() > 0) {
+			JSONArray ids = target.getJSONArray("ids");
+			for (int i = 0; i < ids.length(); i++) {
+				validResults.add(ids.get(i).toString());
+			}
+		} else {
+			URIBuilder casesUrl = new URIBuilder(config.getString("serverUrl"));
+			casesUrl.setPath(ROOT_PATH + config.getString("workspaceOwner") + "/" +
+					config.getString("workspaceName") + "/sets/" + target.getString("setID") + "/scenarios");
+			casesUrl.addParameter("tags", target.getString("tags"));
+
+			String apiResult = apiGet(casesUrl, config.getString("username"), config.getString("apiKey"));
+			if (apiResult == null || ("").equals(apiResult)) {
+				System.out.println("Config file is not correct.");
+				return;
+			}
+			JSONArray scenarios = new JSONArray(apiResult);
+
+			for (int i = 0; i < scenarios.length(); i++) {
+				JSONObject scenario = scenarios.getJSONObject(i);
+				JSONArray testcases = scenario.getJSONArray("testcases");
+
+				for (int j = 0; j < testcases.length(); j++) {
+					JSONObject testcase = testcases.getJSONObject(j);
+					JSONArray results = testcase.getJSONArray("results");
+
+					String targetStatus = target.getString("status");
+
+					String[] platforms = new String[target.getJSONArray("platforms").length()];
+					for (int k = 0; k < target.getJSONArray("platforms").length(); k++) {
+						platforms[k] = target.getJSONArray("platforms").getString(k);
+					}
+
+					for (int k = 0; k < results.length(); k++) {
+						JSONObject result = results.getJSONObject(k);
+						String status = result.getString("status");
+						String platform = result.getString("execPlatform");
+						if (platforms.length == 0) {
+							if (targetStatus.equals(status)) {
+								validResults.add(String.valueOf(result.getInt("id")));
+								break;
+							}
+						} else {
+							if (ArrayUtils.contains(platforms, platform) && targetStatus.equals(status)) {
+								validResults.add(String.valueOf(result.getInt("id")));
+								platforms = ArrayUtils.removeElement(platforms, platform);
+								if (platforms.length == 0) {
+									break;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		for (String result : validResults) {
+			createFile(format, config, result);
+		}
+	}
 }
