@@ -1,6 +1,6 @@
 ##  Result Export Tool
 
-A desktop tool to export a single test result into different formats.
+A desktop tool to export test results into different formats. Each test result will be exported as a file in one of the following formats:
 * `excel`: an Excel file with all the screenshots and parameters
 * `html`: a zip file with all the page HTML files
 * `diag`: a zip file with all evidences and page knowledges for diagnosis
@@ -20,6 +20,8 @@ A desktop tool to export a single test result into different formats.
 `java -Xms1024m -Xmx1024m -jar ResultExport.jar <path to config file> <resultFormat> <path to target file>`
 
 ### Config file
+
+The SWATHub API credentials are setup in this file with the following keys:
 
 #### Parameters
 
@@ -45,14 +47,20 @@ A desktop tool to export a single test result into different formats.
 
 ### Target file
 
+The criterias to select the target test results are defined in this file. We support two kinds of selection:
+* `By ids`: the unique ID(s) of test results are defined 
+* `By filter`: test set level options are provided to fetch required test restuls
+
 #### Parameters
 
-* `ids`: the list of the unique ID of the test result. For instance, the result ID is **12345** in the url `http://swathub.com/app/support/samples/results/12345`.
-_Note: the following parameters will not be affected when ids is not blank._
-* `setID`: the unique ID (string) of the test set in the target workspace, which can be got from the test set url. For instance, the set ID is **"9"** in the url `http://swathub.com/app/support/samples/scenarios/set/9`
+* `ids`: the list of the unique ID (string) of the test result. For instance, the result ID is **"12345"** in the url `http://swathub.com/app/support/samples/results/12345`.
+
+**Note** : the following parameters will be ignored if the `ids` list is not empty.
+
+* `setID`: the unique ID (string) of the test set in the target workspace, which can be got from the test set url. For instance, the set ID is **"9"** in the url `http://swathub.com/app/support/samples/scenarios/set/9`. The `setID` is mandatory in the `filter` mode.
 * `tags`: tags filtering the scenarios to export, separated by comma.
-* `platforms`: the list of the platforms to export
-* `status`: the status of the result to export, `finished`, `failed`, `ok` or `ng`
+* `platforms`: the list of the platforms to export. It means any platform if the value is an empty array.
+* `status`: the status of the result to export, `finished`, `failed`, `ok` or `ng`. It means any status if the value is an empty string.
 
 #### Sample target file
 
@@ -62,6 +70,47 @@ _Note: the following parameters will not be affected when ids is not blank._
   "setID": "1",
   "tags":"test1",
   "status": "finished",
-  "platforms": ["Mac OSX + Firefox", "Mac OSX + Chrome"]
+  "platforms": [
+    "Windows 10 + Firefox",
+    "Windows 10 + Internet Explorer 11",
+    "Windows 10 + Chrome"
+  ]
 }
 ```
+
+### Available platforms
+
+* Windows + Internet Explorer 6
+* Windows + Internet Explorer 7
+* Windows + Internet Explorer 8
+* Windows + Internet Explorer 9
+* Windows + Internet Explorer 10
+* Windows + Internet Explorer 11
+* Windows + Firefox
+* Windows + Chrome
+* Windows XP + Internet Explorer 6
+* Windows XP + Internet Explorer 7
+* Windows XP + Internet Explorer 8
+* Windows XP + Firefox
+* Windows XP + Chrome
+* Windows 7 + Internet Explorer 8
+* Windows 7 + Internet Explorer 9
+* Windows 7 + Internet Explorer 10
+* Windows 7 + Internet Explorer 11
+* Windows 7 + Firefox
+* Windows 7 + Chrome
+* Windows 8 + Internet Explorer 10
+* Windows 8 + Internet Explorer 11
+* Windows 8 + Firefox
+* Windows 8 + Chrome
+* Windows 8.1 + Internet Explorer 11
+* Windows 8.1 + Firefox
+* Windows 8.1 + Chrome
+* Windows 10 + Internet Explorer 11
+* Windows 10 + Firefox
+* Windows 10 + Chrome
+* Mac OSX + Safari
+* Mac OSX + Firefox
+* Mac OSX + Chrome
+* Linux + Firefox
+* Linux + Chrome
