@@ -705,12 +705,12 @@ public class ResultExport {
 						String status = result.getString("status");
 						String platform = result.getString("execPlatform");
 						if (platforms.length == 0) {
-							if (targetStatus.equals(status)) {
+							if ("".equals(status) || targetStatus.equals(status)) {
 								validResults.add(String.valueOf(result.getInt("id")));
 								break;
 							}
 						} else {
-							if (ArrayUtils.contains(platforms, platform) && targetStatus.equals(status)) {
+							if (ArrayUtils.contains(platforms, platform) && ("".equals(status) || targetStatus.equals(status))) {
 								validResults.add(String.valueOf(result.getInt("id")));
 								platforms = ArrayUtils.removeElement(platforms, platform);
 								if (platforms.length == 0) {
