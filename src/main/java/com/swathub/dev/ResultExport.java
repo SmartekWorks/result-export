@@ -26,10 +26,10 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.net.URLConnection;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 public class ResultExport {
 	private static Map<String, String> valueMap = new HashMap<String, String>();
@@ -110,7 +110,7 @@ public class ResultExport {
 		valueMap.put("zh_cn.comment", "注释");
 		valueMap.put("zh_cn.url", "URL");
 	}
-	private static String ROOT_PATH = "/api/";
+	private static String ROOT_PATH = "/swathub/api/";
 
 	private static String apiGet(URIBuilder url, String user, String pass) throws Exception {
 		CredentialsProvider credsProvider = new BasicCredentialsProvider();
@@ -425,7 +425,7 @@ public class ResultExport {
 						}
 					}
 				}
-				if (step.getJSONObject("evidences").has("console")) {
+				if (step.getJSONObject("evidences").has("screenshots")) {
 					JSONArray screenshots = step.getJSONObject("evidences").getJSONArray("screenshots");
 					for (int j = 0; j < screenshots.length(); j++) {
 						String screenshot = screenshots.getString(j).replace("_s.png", ".png");
@@ -477,6 +477,108 @@ public class ResultExport {
 		}
 	}
 
+	private static void fetchRawSteps(JSONArray steps, ZipArchiveOutputStream archive, JSONObject summary) {
+		for (int i = 0; i < steps.length(); i++) {
+			JSONObject step = steps.getJSONObject(i);
+			if (!step.isNull("evidences")) {
+				if (step.getJSONObject("evidences").has("html")) {
+					String htmlFile = step.getJSONObject("evidences").getString("html");
+					if (!"".equals(htmlFile)) {
+						try {
+							URL htmlURL = new URL(summary.getString("baseURL") + htmlFile);
+							BufferedReader htmlInStream = new BufferedReader(new InputStreamReader(htmlURL.openStream()));
+
+							archive.putArchiveEntry(new ZipArchiveEntry("evidences/" + htmlFile));
+							IOUtils.copy(htmlInStream, archive);
+							archive.closeArchiveEntry();
+
+							htmlInStream.close();
+						} catch (IOException e) {
+							// continue
+						}
+					}
+				}
+				if (step.getJSONObject("evidences").has("log")) {
+					String logFile = step.getJSONObject("evidences").getString("log");
+					if (!"".equals(logFile)) {
+						try {
+							URL logURL = new URL(summary.getString("baseURL") + step.getString("seqNo").replace("-", "/") + "/" + logFile);
+							BufferedReader logInStream = new BufferedReader(new InputStreamReader(logURL.openStream()));
+
+							archive.putArchiveEntry(new ZipArchiveEntry("evidences/" + step.getString("seqNo").replace("-", "/") + "/" + logFile));
+							IOUtils.copy(logInStream, archive);
+							archive.closeArchiveEntry();
+
+							logInStream.close();
+						} catch (IOException e) {
+							// continue
+						}
+					}
+				}
+				if (step.getJSONObject("evidences").has("console")) {
+					String consoleFile = step.getJSONObject("evidences").getString("console");
+					if (!"".equals(consoleFile)) {
+						try {
+							URL consoleURL = new URL(summary.getString("baseURL") + step.getString("seqNo").replace("-", "/") + "/" + consoleFile);
+							BufferedReader consoleInStream = new BufferedReader(new InputStreamReader(consoleURL.openStream()));
+
+							archive.putArchiveEntry(new ZipArchiveEntry("evidences/" + step.getString("seqNo").replace("-", "/") + "/" + consoleFile));
+							IOUtils.copy(consoleInStream, archive);
+							archive.closeArchiveEntry();
+
+							consoleInStream.close();
+						} catch (IOException e) {
+							// continue
+						}
+					}
+				}
+				if (step.getJSONObject("evidences").has("screenshots")) {
+					JSONArray screenshots = step.getJSONObject("evidences").getJSONArray("screenshots");
+					for (int j = 0; j < screenshots.length(); j++) {
+						String screenshot = screenshots.getString(j).replace("_s.png", ".png");
+						try {
+							URL imageUrl = new URL(summary.getString("baseURL").concat(screenshot));
+							BufferedImage image;
+							try {
+								image = ImageIO.read(imageUrl);
+							} catch (IIOException e) {
+								System.out.println("Image URL may not exist:" + imageUrl.toString());
+								continue;
+							}
+							ByteArrayOutputStream baos = new ByteArrayOutputStream();
+							ImageIO.write(image, "png", baos);
+
+							archive.putArchiveEntry(new ZipArchiveEntry("evidences/" + screenshot));
+							baos.writeTo(archive);
+							archive.closeArchiveEntry();
+						} catch (IOException e) {
+							// continue
+						}
+					}
+				}
+				if (step.getJSONObject("evidences").has("files")) {
+					JSONArray files = step.getJSONObject("evidences").getJSONArray("files");
+					for (int j = 0; j < files.length(); j++) {
+						String file = files.getString(j);
+						try {
+							URL fileUrl = new URL(summary.getString("baseURL").concat(file));
+							BufferedReader fileInStream = new BufferedReader(new InputStreamReader(fileUrl.openStream()));
+
+							archive.putArchiveEntry(new ZipArchiveEntry("evidences/" + file));
+							IOUtils.copy(fileInStream, archive);
+							archive.closeArchiveEntry();
+
+							fileInStream.close();
+						} catch (IOException e) {
+							// continue
+						}
+					}
+				}
+			}
+			fetchRawSteps(step.getJSONArray("steps"), archive, summary);
+		}
+	}
+
 	private static void createFile(String format, JSONObject config, String resultId) throws Exception{
 		String locale = config.getString("locale");
 
@@ -493,7 +595,31 @@ public class ResultExport {
 
 		JSONObject result = new JSONObject(apiResult);
 		JSONObject summary = result.getJSONObject("summary");
-		if ("excel".equals(format)) {
+		if ("raw".equals(format)) {
+			ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+			ZipArchiveOutputStream archive = new ZipArchiveOutputStream(byteOut);
+
+			archive.putArchiveEntry(new ZipArchiveEntry("result.json"));
+			ByteArrayInputStream bytesInStream = new ByteArrayInputStream(apiResult.getBytes());
+			IOUtils.copy(bytesInStream, archive);
+			bytesInStream.close();
+			archive.closeArchiveEntry();
+
+			fetchRawSteps(result.getJSONArray("result"), archive, summary);
+
+			archive.finish();
+			archive.flush();
+			archive.close();
+
+			byteOut.flush();
+			FileOutputStream fop = new FileOutputStream("raw-" + summary.getString("scenarioName") +
+					"-" + summary.getString("caseName") + "-" + resultId + ".zip");
+			byteOut.writeTo(fop);
+			byteOut.close();
+			fop.close();
+			System.out.println("Raw file is created. Result ID:" + resultId);
+		}
+		else if ("excel".equals(format)) {
 			// create result sheet
 			HSSFWorkbook workbook = new HSSFWorkbook();
 			HSSFCreationHelper creationHelper = workbook.getCreationHelper();
@@ -652,8 +778,8 @@ public class ResultExport {
 		}
 
 		String format = args[1];
-		if (!"excel".equals(format) && !"html".equals(format) && !"diag".equals(format)) {
-			System.out.println("Format must be one of the following: excel, html, diag");
+		if (!"excel".equals(format) && !"html".equals(format) && !"diag".equals(format) && !"raw".equals(format)) {
+			System.out.println("Format must be one of the following: excel, html, diag, raw");
 			return;
 		}
 
@@ -665,6 +791,7 @@ public class ResultExport {
 
 		JSONObject config = new JSONObject(FileUtils.readFileToString(configFile, "UTF-8"));
 		JSONObject target = new JSONObject(FileUtils.readFileToString(targetFile, "UTF-8"));
+		JSONObject filters = target.getJSONObject("filters");
 		ArrayList<String> validResults = new ArrayList<String>();
 
 		if (target.has("ids") && target.getJSONArray("ids").length() > 0) {
@@ -675,8 +802,8 @@ public class ResultExport {
 		} else {
 			URIBuilder casesUrl = new URIBuilder(config.getString("serverUrl"));
 			casesUrl.setPath(ROOT_PATH + config.getString("workspaceOwner") + "/" +
-					config.getString("workspaceName") + "/sets/" + target.getString("setID") + "/scenarios");
-			casesUrl.addParameter("tags", target.getString("tags"));
+					config.getString("workspaceName") + "/sets/" + filters.getString("setID") + "/scenarios");
+			casesUrl.addParameter("tags", filters.getString("tags"));
 
 			String apiResult = apiGet(casesUrl, config.getString("username"), config.getString("apiKey"));
 			if (apiResult == null || ("").equals(apiResult)) {
@@ -693,30 +820,37 @@ public class ResultExport {
 					JSONObject testcase = testcases.getJSONObject(j);
 					JSONArray results = testcase.getJSONArray("results");
 
-					String targetStatus = target.getString("status");
+					String targetStatus = filters.getString("status");
 
-					String[] platforms = new String[target.getJSONArray("platforms").length()];
-					for (int k = 0; k < target.getJSONArray("platforms").length(); k++) {
-						platforms[k] = target.getJSONArray("platforms").getString(k);
+					String targetPlatform = filters.getString("platform");
+
+					Date beforeDate = new Date();
+					String beforeDateString = filters.getString("beforeDate");
+					if (!("").equals(beforeDateString)) {
+						DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
+						dateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Tokyo"));
+						beforeDate = dateFormat.parse(beforeDateString);
 					}
 
 					for (int k = 0; k < results.length(); k++) {
 						JSONObject result = results.getJSONObject(k);
+
 						String status = result.getString("status");
+
 						String platform = result.getString("execPlatform");
-						if (platforms.length == 0) {
-							if ("".equals(targetStatus) || targetStatus.equals(status)) {
-								validResults.add(String.valueOf(result.getInt("id")));
-								break;
-							}
-						} else {
-							if (ArrayUtils.contains(platforms, platform) && ("".equals(targetStatus) || targetStatus.equals(status))) {
-								validResults.add(String.valueOf(result.getInt("id")));
-								platforms = ArrayUtils.removeElement(platforms, platform);
-								if (platforms.length == 0) {
-									break;
-								}
-							}
+
+						String timeStartString = result.getString("timeStart");
+						DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+						dateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Tokyo"));
+						Date timeStart = dateFormat.parse(timeStartString);
+
+						if (timeStart.getTime() - beforeDate.getTime() > 0) {
+							continue;
+						}
+
+						if (("".equals(targetPlatform) || targetPlatform.equals(platform)) && ("".equals(targetStatus) || targetStatus.equals(status))) {
+							validResults.add(String.valueOf(result.getInt("id")));
+							break;
 						}
 					}
 				}

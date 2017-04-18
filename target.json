@@ -1,7 +1,10 @@
 {
-  "ids":[],
-  "setID": "",
-  "tags":"",
-  "status": "",
-  "platforms": []
+  "ids": [],
+  "filters": {
+    "setID": "",
+    "tags": "",
+    "status": "",
+    "platform": "",
+    "beforeDate": ""
+  }
 }
