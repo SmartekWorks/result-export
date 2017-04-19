@@ -112,6 +112,8 @@ public class ResultExport {
 	}
 	private static String ROOT_PATH = "/swathub/api/";
 
+	private static String lastPageCode = null;
+
 	private static String apiGet(URIBuilder url, String user, String pass) throws Exception {
 		CredentialsProvider credsProvider = new BasicCredentialsProvider();
 		credsProvider.setCredentials(
@@ -373,6 +375,13 @@ public class ResultExport {
 	private static void fetchDiagSteps(JSONArray steps, ZipArchiveOutputStream archive, JSONObject summary, JSONObject config) {
 		for (int i = 0; i < steps.length(); i++) {
 			JSONObject step = steps.getJSONObject(i);
+			if (step.getBoolean("executed") && "pop".equals(step.getString("type"))) {
+				if (step.isNull("pageCode")) {
+					lastPageCode = null;
+				} else {
+					lastPageCode = step.getString("pageCode");
+				}
+			}
 			if (!step.isNull("evidences")) {
 				if (step.getJSONObject("evidences").has("html")) {
 					String htmlFile = step.getJSONObject("evidences").getString("html");
@@ -450,11 +459,11 @@ public class ResultExport {
 					}
 				}
 			}
-			if (!step.isNull("error") && "pop".equals(step.getString("type"))) {
+			if (!step.isNull("error") && lastPageCode != null) {
 				try {
 					URIBuilder apiURL = new URIBuilder(config.getString("serverUrl"));
 					apiURL.setPath(ROOT_PATH + config.getString("workspaceOwner") + "/" +
-							config.getString("workspaceName") + "/pages/" + step.getString("pageCode"));
+							config.getString("workspaceName") + "/pages/" + lastPageCode);
 					String apiResult = apiGet(apiURL, config.getString("username"), config.getString("apiKey"));
 					JSONObject page = new JSONObject(apiResult);
 
