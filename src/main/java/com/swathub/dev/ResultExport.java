@@ -110,7 +110,7 @@ public class ResultExport {
 		valueMap.put("zh_cn.comment", "注释");
 		valueMap.put("zh_cn.url", "URL");
 	}
-	private static String ROOT_PATH = "/swathub/api/";
+	private static String ROOT_PATH = "/api/";
 
 	private static String lastPageCode = null;
 

@@ -1,6 +1,7 @@
 ##  Result Export Tool
 
 A desktop tool to export test results into different formats. Each test result will be exported as a file in one of the following formats:
+* `raw`: a zip file with all the evidences
 * `excel`: an Excel file with all the screenshots and parameters
 * `html`: a zip file with all the page HTML files
 * `diag`: a zip file with all evidences and page knowledges for diagnosis
@@ -13,7 +14,7 @@ A desktop tool to export test results into different formats. Each test result w
 
 `java -jar ResultExport.jar <path to config file> <resultFormat> <path to target file>`
 
-* `resultFormat`: type of the result format, `excel`, `html`, or `diag`
+* `resultFormat`: type of the result format, `raw`, `excel`, `html`, or `diag`
 
 **Hint**: if the size of the test result is quite large, please adjust the JVM arguments to increase the heap size. For instance:
 
@@ -57,24 +58,24 @@ The criterias to select the target test results are defined in this file. We sup
 
 **Note** : the following parameters will be ignored if the `ids` list is not empty.
 
-* `setID`: the unique ID (string) of the test set in the target workspace, which can be got from the test set url. For instance, the set ID is **"9"** in the url `http://swathub.com/app/support/samples/scenarios/set/9`. The `setID` is mandatory in the `filter` mode.
-* `tags`: tags filtering the scenarios to export, separated by comma.
-* `platforms`: the list of the platforms to export. It means any platform if the value is an empty array.
-* `status`: the status of the result to export, `finished`, `failed`, `ok` or `ng`. It means any status if the value is an empty string.
+* `setID`(mandatory): the unique ID (string) of the test set in the target workspace, which can be got from the test set url. For instance, the set ID is **"9"** in the url `http://swathub.com/app/support/samples/scenarios/set/9`. 
+* `tags`(optional): tags filtering the scenarios to export, separated by comma. 
+* `platform`(optional): the platform to export. It means any platform if the value is an empty string. 
+* `status`(optional): the status of the result to export, `finished`, `failed`, `ok` or `ng`. It means any status if the value is an empty string.
+* `beforeDate`(optional): the date when results generated before, in the format of `YYYY/MM/DD`. It means now if the value is an empty string. Please be noted the timezone of `beforeDate` is Asia/Tokyo.
 
 #### Sample target file
 
 ```
 {
   "ids":[],
-  "setID": "1",
-  "tags":"test1",
-  "status": "finished",
-  "platforms": [
-    "Windows 10 + Firefox",
-    "Windows 10 + Internet Explorer 11",
-    "Windows 10 + Chrome"
-  ]
+  "filters": {
+    "setID": "1",
+    "tags": "tag1, tag2",
+    "status": "finished",
+    "platform": "Windows 10 + Firefox",
+    "beforeDate": "2017/08/08"
+  }
 }
 ```
 
