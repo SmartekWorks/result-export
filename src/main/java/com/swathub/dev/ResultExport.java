@@ -5,7 +5,6 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
@@ -26,7 +25,6 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URL;
-import java.net.URLConnection;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -351,7 +349,145 @@ public class ResultExport {
 		return rowCnt;
 	}
 
-	private static void fetchHtmlSteps(JSONArray steps, ZipArchiveOutputStream archive, JSONObject summary) {
+	private static String fetchHtmlSteps(JSONArray steps, ZipArchiveOutputStream archive, String html, JSONObject summary, String locale) throws Exception {
+		for (int i = 0; i < steps.length(); i++) {
+			JSONObject step = steps.getJSONObject(i);
+			if (step.getString("seqNo").equals("")) {
+				html += "<div class=\"pure-g\"><div class=\"pure-u-1\">&nbsp;</div>";
+
+				html += "<div class=\"pure-u-4-24\"><div class=\"title first\">" + valueMap.get(locale + ".case") + "：</div></div>";
+				html += "<div class=\"pure-u-20-24\">" + step.getString("stepTitle") + "</div>";
+
+				html += "<div class=\"pure-u-1 title first\"><table class=\"pure-table\"><thead><tr>";
+				html += "<th>" + valueMap.get(locale + ".param") + "</th>";
+				html += "<th>" + valueMap.get(locale + ".variable") + "</th>";
+				html += "<th>" + valueMap.get(locale + ".value") + "</th>";
+				html += "</tr></thead>";
+
+				html += "<tbody>";
+				for (int j = 0; j < step.getJSONArray("paramData").length(); j++) {
+					JSONObject item = step.getJSONArray("paramData").getJSONObject(j);
+					html += "<tr>";
+					if (item.getBoolean("runtimeEnabled")) {
+						html += "<td>" + item.getString("name") + "</td>";
+						html += "<td>" + item.getString("variable") + "</td>";
+						html += "<td>" + item.getString("value") + "</td>";
+					} else {
+						html += "<td style=\"background-color: grey;\">" + item.getString("name") + "</td>";
+						html += "<td style=\"background-color: grey;\">" + item.getString("variable") + "</td>";
+						html += "<td style=\"background-color: grey;\">" + item.getString("value") + "</td>";
+					}
+					html += "</tr>";
+				}
+				html += "</tbody></table></div></div>";
+			} else {
+				String title = step.getString("stepTitle");
+				if (step.has("typeName") && !step.isNull("typeName")) {
+					title = title + "(" + step.getString("typeName") + ")";
+				}
+				html += "<div class=\"pure-g\"><div class=\"pure-u-1\">&nbsp;</div>";
+				if (step.getBoolean("executed")) {
+					html += "<div class=\"pure-u-2-24\"><div class=\"first\">" + step.getString("seqNo") + "</div></div>";
+				} else {
+					html += "<div class=\"pure-u-2-24\" style=\"background-color: grey;\">><div class=\"first\">" + step.getString("seqNo") + "</div></div>";
+				}
+				html += "<div class=\"pure-u-3-24\"><div class=\"title\">" + valueMap.get(locale + ".name") + "：</div></div>";
+				html += "<div class=\"pure-u-19-24\">" + title + "</div>";
+
+				html += "<div class=\"pure-u-2-24\">&nbsp;</div>";
+				html += "<div class=\"pure-u-3-24\"><div class=\"title\">" + valueMap.get(locale + ".component.type") + "：</div></div>";
+				html += "<div class=\"pure-u-19-24\">" + valueMap.get(locale + ".type." + step.getString("type")) + "</div>";
+
+				List<JSONObject> paramData = new ArrayList<JSONObject>();
+				JSONObject comment = null;
+				for (int j = 0; j < step.getJSONArray("paramData").length(); j++) {
+					JSONObject item = step.getJSONArray("paramData").getJSONObject(j);
+					if (item.getString("code").equals("comment")) {
+						comment = item;
+					} else {
+						paramData.add(item);
+					}
+				}
+
+				if (comment != null) {
+					html += "<div class=\"pure-u-2-24\">&nbsp;</div>";
+					html += "<div class=\"pure-u-3-24\"><div class=\"title\">" + valueMap.get(locale + ".comment") + "：</div></div>";
+					html += "<div class=\"pure-u-19-24\">" + comment.getString("value") + "</div>";
+				}
+
+				if (!step.isNull("evidences") && step.getJSONObject("evidences").has("url")) {
+					html += "<div class=\"pure-u-2-24\">&nbsp;</div>";
+					html += "<div class=\"pure-u-3-24\"><div class=\"title\">" + valueMap.get(locale + ".url") + "：</div></div>";
+					html += "<div class=\"pure-u-19-24\">" + step.getJSONObject("evidences").getString("url") + "</div>";
+				}
+
+				if (!step.isNull("error")) {
+					html += "<div class=\"pure-u-2-24\">&nbsp;</div>";
+					html += "<div class=\"pure-u-3-24\"><div class=\"title\">" + valueMap.get(locale + ".result.error") + "：</div></div>";
+					html += "<div class=\"pure-u-19-24\" style=\"color: red;\">" + step.getString("error") + "</div>";
+				}
+
+				html += "<div class=\"pure-u-2-24\">&nbsp;</div>";
+				html += "<div class=\"pure-u-22-24\"><table class=\"pure-table\"><thead>";
+				html += "<th>" + valueMap.get(locale + ".param") + "</th>";
+				html += "<th>" + valueMap.get(locale + ".variable") + "</th>";
+				html += "<th>" + valueMap.get(locale + ".value") + "</th>";
+				html += "</tr></thead>";
+
+				for (JSONObject item : paramData) {
+					html += "<tr>";
+					if (!item.isNull("runtimeEnabled") && item.getBoolean("runtimeEnabled")) {
+						html += "<td>" + item.getString("name") + "</td>";
+						html += "<td>" + item.getString("variable") + "</td>";
+						html += "<td>" + item.getString("value") + "</td>";
+					} else {
+						html += "<td style=\"background-color: grey;\">" + item.getString("name") + "</td>";
+						html += "<td style=\"background-color: grey;\">" + item.getString("variable") + "</td>";
+						html += "<td style=\"background-color: grey;\">" + item.getString("value") + "</td>";
+					}
+					html += "</tr>";
+				}
+				html += "</tbody></table></div>";
+
+				if (!step.isNull("evidences") && step.getJSONObject("evidences").has("screenshots")) {
+					JSONArray screenshots = step.getJSONObject("evidences").getJSONArray("screenshots");
+					for (int j = 0; j < screenshots.length(); j++) {
+						String screenshot = screenshots.getString(j).replace("_s.png", ".png");
+						try {
+							URL imageUrl = new URL(summary.getString("baseURL").concat(screenshot));
+							BufferedImage image;
+							try {
+								image = ImageIO.read(imageUrl);
+							} catch (IIOException e) {
+								System.out.println("Image URL may not exist:" + imageUrl.toString());
+								continue;
+							}
+							ByteArrayOutputStream baos = new ByteArrayOutputStream();
+							ImageIO.write(image, "png", baos);
+
+							archive.putArchiveEntry(new ZipArchiveEntry("evidences/" + screenshot));
+							baos.writeTo(archive);
+							archive.closeArchiveEntry();
+
+							html += "<div class=\"pure-u-2-24\">&nbsp;</div>";
+							html += "<div class=\"pure-u-20-24\"><img class=\"pure-img\" src=\"./evidences/" + screenshot + "\"></div>";
+							html += "<div class=\"pure-u-2-24\">&nbsp;</div>";
+						} catch (IOException e) {
+							// continue
+						}
+					}
+				}
+
+				html += "</div>";
+			}
+
+			html = fetchHtmlSteps(step.getJSONArray("steps"), archive, html, summary, locale);
+		}
+
+		return html;
+	}
+
+	private static void fetchSourceSteps(JSONArray steps, ZipArchiveOutputStream archive, JSONObject summary) {
 		for (int i = 0; i < steps.length(); i++) {
 			JSONObject step = steps.getJSONObject(i);
 			if (!step.isNull("evidences") && step.getJSONObject("evidences").has("html")) {
@@ -368,7 +504,7 @@ public class ResultExport {
 					// continue
 				}
 			}
-			fetchHtmlSteps(step.getJSONArray("steps"), archive, summary);
+			fetchSourceSteps(step.getJSONArray("steps"), archive, summary);
 		}
 	}
 
@@ -734,19 +870,92 @@ public class ResultExport {
 			ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
 			ZipArchiveOutputStream archive = new ZipArchiveOutputStream(byteOut);
 
-			fetchHtmlSteps(result.getJSONArray("result"), archive, summary);
+			String execInfo = "<div class=\"pure-g\"><div class=\"pure-u-1\">&nbsp;</div>";
+			execInfo += "<div class=\"pure-u-4-24\"><div class=\"title first\">" + valueMap.get(locale + ".scenario") + "：</div></div>";
+			execInfo += "<div class=\"pure-u-20-24\">" + summary.getString("scenarioName") + "</div>";
+
+			execInfo += "<div class=\"pure-u-4-24\"><div class=\"title first\">" + valueMap.get(locale + ".result") + "：</div></div>";
+			execInfo += "<div class=\"pure-u-20-24\">" + valueMap.get(locale + ".status." + summary.getString("status")) + "</div>";
+
+			execInfo += "<div class=\"pure-u-4-24\"><div class=\"title first\">" + valueMap.get(locale + ".execNode") + "：</div></div>";
+			execInfo += "<div class=\"pure-u-20-24\">" + summary.getString("execNode") + "</div>";
+
+			execInfo += "<div class=\"pure-u-4-24\"><div class=\"title first\">" + valueMap.get(locale + ".execPlatform") + "：</div></div>";
+			execInfo += "<div class=\"pure-u-20-24\">" + summary.getString("execPlatform") + "</div>";
+
+			execInfo += "<div class=\"pure-u-4-24\"><div class=\"title first\">" + valueMap.get(locale + ".testServer") + "：</div></div>";
+			execInfo += "<div class=\"pure-u-20-24\">" + summary.getString("testServer") + "</div>";
+
+			execInfo += "<div class=\"pure-u-4-24\"><div class=\"title first\">" + valueMap.get(locale + ".apiServer") + "：</div></div>";
+			execInfo += "<div class=\"pure-u-20-24\">" + summary.getString("apiServer") + "</div>";
+
+			execInfo += "<div class=\"pure-u-4-24\"><div class=\"title first\">" + valueMap.get(locale + ".result.execTime") + "：</div></div>";
+			execInfo += "<div class=\"pure-u-20-24\">" + summary.getDouble("duration") + "s (" +
+					summary.getString("timeStart") + "~" + summary.getString("timeEnd") + ")</div>";
+
+			execInfo += "<div class=\"pure-u-4-24\"><div class=\"title first\">" + valueMap.get(locale + ".result.error") + "：</div></div>";
+			if ("NA".equals(summary.getString("error"))) {
+				execInfo += "<div class=\"pure-u-20-24\">NA</div>";
+			} else {
+				execInfo += "<div class=\"pure-u-20-24\" style=\"color: red;\">" + summary.getString("error") + "</div>";
+			}
+
+			execInfo += "<div class=\"pure-u-4-24\"><div class=\"title first\">" + valueMap.get(locale + ".result.initBy") + "：</div></div>";
+			execInfo += "<div class=\"pure-u-20-24\">" + summary.getString("initBy") + "(" + summary.getString("initTime") + ")</div>";
+
+			execInfo += "<div class=\"pure-u-4-24\"><div class=\"title first\">" + valueMap.get(locale + ".result.verifyBy") + "：</div></div>";
+			if ("NA".equals(summary.getString("verifyBy"))) {
+				execInfo += "<div class=\"pure-u-20-24\">NA</div>";
+			} else {
+				execInfo += "<div class=\"pure-u-20-24\">" + summary.getString("verifyBy") + "(" + summary.getString("verifyTime") + ")</div>";
+			}
+
+			String stepInfo = fetchHtmlSteps(result.getJSONArray("result"), archive, "", summary, locale);
+
+			ClassLoader classloader = Thread.currentThread().getContextClassLoader();
+			String template = IOUtils.toString(classloader.getResourceAsStream("template.html"));
+			template = template.replace("_exec-info_", execInfo);
+			template = template.replace("_step-info_", stepInfo);
+
+			archive.putArchiveEntry(new ZipArchiveEntry("index.html"));
+			ByteArrayInputStream bytesInStream = new ByteArrayInputStream(template.getBytes());
+			IOUtils.copy(bytesInStream, archive);
+			bytesInStream.close();
+			archive.closeArchiveEntry();
+
+			archive.putArchiveEntry(new ZipArchiveEntry("css/pure-min.css"));
+			InputStream inStream = classloader.getResourceAsStream("pure-min.css");
+			IOUtils.copy(inStream, archive);
+			inStream.close();
+			archive.closeArchiveEntry();
+
+			archive.flush();
+			archive.close();
+
+			byteOut.flush();
+			FileOutputStream fop = new FileOutputStream("html-" + summary.getString("scenarioName") +
+					"-" + summary.getString("caseName") + "-" + resultId + ".zip");
+			byteOut.writeTo(fop);
+			byteOut.close();
+			fop.close();
+			System.out.println("Html zip file is created. Result ID:" + resultId);
+		} else if ("source".equals(format)) {
+			ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+			ZipArchiveOutputStream archive = new ZipArchiveOutputStream(byteOut);
+
+			fetchSourceSteps(result.getJSONArray("result"), archive, summary);
 
 			archive.finish();
 			archive.flush();
 			archive.close();
 
 			byteOut.flush();
-			FileOutputStream fop = new FileOutputStream(summary.getString("scenarioName") +
+			FileOutputStream fop = new FileOutputStream("source-" + summary.getString("scenarioName") +
 					"-" + summary.getString("caseName") + "-" + resultId + ".zip");
 			byteOut.writeTo(fop);
 			byteOut.close();
 			fop.close();
-			System.out.println("Html zip file is created. Result ID:" + resultId);
+			System.out.println("Page sources file is created. Result ID:" + resultId);
 		} else if ("diag".equals(format)) {
 			ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
 			ZipArchiveOutputStream archive = new ZipArchiveOutputStream(byteOut);

@@ -3,7 +3,8 @@
 A desktop tool to export test results into different formats. Each test result will be exported as a file in one of the following formats:
 * `raw`: a zip file with all the evidences
 * `excel`: an Excel file with all the screenshots and parameters
-* `html`: a zip file with all the page HTML files
+* `html`: a zip file with all the screenshots and parameters
+* `source`: a zip file with all the page HTML files
 * `diag`: a zip file with all evidences and page knowledges for diagnosis
 
 ### Build
@@ -14,7 +15,7 @@ A desktop tool to export test results into different formats. Each test result w
 
 `java -jar ResultExport.jar <path to config file> <resultFormat> <path to target file>`
 
-* `resultFormat`: type of the result format, `raw`, `excel`, `html`, or `diag`
+* `resultFormat`: type of the result format, `raw`, `excel`, `html`, `source`, or `diag`
 
 **Hint**: if the size of the test result is quite large, please adjust the JVM arguments to increase the heap size. For instance:
 
