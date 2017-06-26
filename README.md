@@ -63,7 +63,8 @@ The criterias to select the target test results are defined in this file. We sup
 * `tags`(optional): tags filtering the scenarios to export, separated by comma. 
 * `platform`(optional): the platform to export. It means any platform if the value is an empty string. 
 * `status`(optional): the status of the result to export, `finished`, `failed`, `ok` or `ng`. It means any status if the value is an empty string.
-* `beforeDate`(optional): the date when results generated before, in the format of `YYYY/MM/DD`. It means now if the value is an empty string. Please be noted the timezone of `beforeDate` is Asia/Tokyo.
+* `beforeDate`(optional): the date when results generated before, in the format of `YYYY/MM/DD hh:mm:ss`. It means now if the value is an empty string. Please be noted the timezone of `beforeDate` is Asia/Tokyo.
+* `lastCount`(mandatory): the last count of the results meet the above filters, 1 means the last one.
 
 #### Sample target file
 
@@ -75,7 +76,8 @@ The criterias to select the target test results are defined in this file. We sup
     "tags": "tag1, tag2",
     "status": "finished",
     "platform": "Windows 10 + Firefox",
-    "beforeDate": "2017/08/08"
+    "beforeDate": "2017/08/08 14:00:00",
+    "lastCount": 1
   }
 }
 ```

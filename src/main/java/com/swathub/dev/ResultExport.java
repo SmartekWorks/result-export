@@ -1045,11 +1045,12 @@ public class ResultExport {
 					Date beforeDate = new Date();
 					String beforeDateString = filters.getString("beforeDate");
 					if (!("").equals(beforeDateString)) {
-						DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
+						DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 						dateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Tokyo"));
 						beforeDate = dateFormat.parse(beforeDateString);
 					}
 
+					ArrayList<String> allResults = new ArrayList<String>();
 					for (int k = 0; k < results.length(); k++) {
 						JSONObject result = results.getJSONObject(k);
 
@@ -1067,9 +1068,12 @@ public class ResultExport {
 						}
 
 						if (("".equals(targetPlatform) || targetPlatform.equals(platform)) && ("".equals(targetStatus) || targetStatus.equals(status))) {
-							validResults.add(String.valueOf(result.getInt("id")));
-							break;
+							allResults.add(String.valueOf(result.getInt("id")));
 						}
+					}
+					int lastCount = filters.getInt("lastCount");
+					if (lastCount > 0 && allResults.size() > lastCount) {
+						validResults.add(allResults.get(lastCount - 1));
 					}
 				}
 			}
