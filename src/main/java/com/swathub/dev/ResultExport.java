@@ -1072,7 +1072,7 @@ public class ResultExport {
 						}
 					}
 					int lastCount = filters.getInt("lastCount");
-					if (lastCount > 0 && allResults.size() > lastCount) {
+					if (lastCount > 0 && allResults.size() >= lastCount) {
 						validResults.add(allResults.get(lastCount - 1));
 					}
 				}
