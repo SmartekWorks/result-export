@@ -389,7 +389,7 @@ public class ResultExport {
 				if (step.getBoolean("executed")) {
 					html += "<div class=\"pure-u-2-24\"><div class=\"first\">" + step.getString("seqNo") + "</div></div>";
 				} else {
-					html += "<div class=\"pure-u-2-24\" style=\"background-color: grey;\">><div class=\"first\">" + step.getString("seqNo") + "</div></div>";
+					html += "<div class=\"pure-u-2-24\" style=\"background-color: grey;\"><div class=\"first\">" + step.getString("seqNo") + "</div></div>";
 				}
 				html += "<div class=\"pure-u-3-24\"><div class=\"title\">" + valueMap.get(locale + ".name") + "：</div></div>";
 				html += "<div class=\"pure-u-19-24\">" + title + "</div>";
@@ -493,13 +493,16 @@ public class ResultExport {
 			if (!step.isNull("evidences") && step.getJSONObject("evidences").has("html")) {
 				try {
 					URL htmlURL = new URL(summary.getString("baseURL") + step.getJSONObject("evidences").getString("html"));
-					BufferedReader htmlInStream = new BufferedReader(new InputStreamReader(htmlURL.openStream()));
+					BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(htmlURL.openStream(), "UTF-8"));
+					String html = IOUtils.toString(bufferedReader);
 
 					archive.putArchiveEntry(new ZipArchiveEntry(step.getString("seqNo") + ".html"));
-					IOUtils.copy(htmlInStream, archive);
+					ByteArrayInputStream bytesInStream = new ByteArrayInputStream(html.getBytes("UTF-8"));
+					IOUtils.copy(bytesInStream, archive);
 					archive.closeArchiveEntry();
 
-					htmlInStream.close();
+					bufferedReader.close();
+					bytesInStream.close();
 				} catch (IOException e) {
 					// continue
 				}
@@ -524,13 +527,16 @@ public class ResultExport {
 					if (!"".equals(htmlFile)) {
 						try {
 							URL htmlURL = new URL(summary.getString("baseURL") + htmlFile);
-							BufferedReader htmlInStream = new BufferedReader(new InputStreamReader(htmlURL.openStream()));
+							BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(htmlURL.openStream(), "UTF-8"));
+							String html = IOUtils.toString(bufferedReader);
 
 							archive.putArchiveEntry(new ZipArchiveEntry("evidences/" + htmlFile));
-							IOUtils.copy(htmlInStream, archive);
+							ByteArrayInputStream bytesInStream = new ByteArrayInputStream(html.getBytes("UTF-8"));
+							IOUtils.copy(bytesInStream, archive);
 							archive.closeArchiveEntry();
 
-							htmlInStream.close();
+							bufferedReader.close();
+							bytesInStream.close();
 						} catch (IOException e) {
 							// continue
 						}
@@ -541,13 +547,16 @@ public class ResultExport {
 					if (!"".equals(logFile)) {
 						try {
 							URL logURL = new URL(summary.getString("baseURL") + step.getString("seqNo").replace("-", "/") + "/" + logFile);
-							BufferedReader logInStream = new BufferedReader(new InputStreamReader(logURL.openStream()));
+							BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(logURL.openStream(), "UTF-8"));
+							String log = IOUtils.toString(bufferedReader);
 
 							archive.putArchiveEntry(new ZipArchiveEntry("evidences/" + step.getString("seqNo").replace("-", "/") + "/" + logFile));
-							IOUtils.copy(logInStream, archive);
+							ByteArrayInputStream bytesInStream = new ByteArrayInputStream(log.getBytes("UTF-8"));
+							IOUtils.copy(bytesInStream, archive);
 							archive.closeArchiveEntry();
 
-							logInStream.close();
+							bufferedReader.close();
+							bytesInStream.close();
 						} catch (IOException e) {
 							// continue
 						}
@@ -558,13 +567,16 @@ public class ResultExport {
 					if (!"".equals(consoleFile)) {
 						try {
 							URL consoleURL = new URL(summary.getString("baseURL") + step.getString("seqNo").replace("-", "/") + "/" + consoleFile);
-							BufferedReader consoleInStream = new BufferedReader(new InputStreamReader(consoleURL.openStream()));
+							BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(consoleURL.openStream(), "UTF-8"));
+							String console = IOUtils.toString(bufferedReader);
 
 							archive.putArchiveEntry(new ZipArchiveEntry("evidences/" + step.getString("seqNo").replace("-", "/") + "/" + consoleFile));
-							IOUtils.copy(consoleInStream, archive);
+							ByteArrayInputStream bytesInStream = new ByteArrayInputStream(console.getBytes("UTF-8"));
+							IOUtils.copy(bytesInStream, archive);
 							archive.closeArchiveEntry();
 
-							consoleInStream.close();
+							bufferedReader.close();
+							bytesInStream.close();
 						} catch (IOException e) {
 							// continue
 						}
@@ -610,7 +622,7 @@ public class ResultExport {
 					shtmBIS.close();
 
 					archive.putArchiveEntry(new ZipArchiveEntry(page.getString("name") + ".rule"));
-					ByteArrayInputStream ruleBIS = new ByteArrayInputStream(page.getString("rule").getBytes());
+					ByteArrayInputStream ruleBIS = new ByteArrayInputStream(page.getString("rule").getBytes("UTF-8"));
 					IOUtils.copy(ruleBIS, archive);
 					archive.closeArchiveEntry();
 					ruleBIS.close();
@@ -631,13 +643,16 @@ public class ResultExport {
 					if (!"".equals(htmlFile)) {
 						try {
 							URL htmlURL = new URL(summary.getString("baseURL") + htmlFile);
-							BufferedReader htmlInStream = new BufferedReader(new InputStreamReader(htmlURL.openStream()));
+							BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(htmlURL.openStream(), "UTF-8"));
+							String html = IOUtils.toString(bufferedReader);
 
 							archive.putArchiveEntry(new ZipArchiveEntry("evidences/" + htmlFile));
-							IOUtils.copy(htmlInStream, archive);
+							ByteArrayInputStream bytesInStream = new ByteArrayInputStream(html.getBytes("UTF-8"));
+							IOUtils.copy(bytesInStream, archive);
 							archive.closeArchiveEntry();
 
-							htmlInStream.close();
+							bufferedReader.close();
+							bytesInStream.close();
 						} catch (IOException e) {
 							// continue
 						}
@@ -648,13 +663,16 @@ public class ResultExport {
 					if (!"".equals(logFile)) {
 						try {
 							URL logURL = new URL(summary.getString("baseURL") + step.getString("seqNo").replace("-", "/") + "/" + logFile);
-							BufferedReader logInStream = new BufferedReader(new InputStreamReader(logURL.openStream()));
+							BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(logURL.openStream(), "UTF-8"));
+							String log = IOUtils.toString(bufferedReader);
 
 							archive.putArchiveEntry(new ZipArchiveEntry("evidences/" + step.getString("seqNo").replace("-", "/") + "/" + logFile));
-							IOUtils.copy(logInStream, archive);
+							ByteArrayInputStream bytesInStream = new ByteArrayInputStream(log.getBytes("UTF-8"));
+							IOUtils.copy(bytesInStream, archive);
 							archive.closeArchiveEntry();
 
-							logInStream.close();
+							bufferedReader.close();
+							bytesInStream.close();
 						} catch (IOException e) {
 							// continue
 						}
@@ -665,13 +683,16 @@ public class ResultExport {
 					if (!"".equals(consoleFile)) {
 						try {
 							URL consoleURL = new URL(summary.getString("baseURL") + step.getString("seqNo").replace("-", "/") + "/" + consoleFile);
-							BufferedReader consoleInStream = new BufferedReader(new InputStreamReader(consoleURL.openStream()));
+							BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(consoleURL.openStream(), "UTF-8"));
+							String console = IOUtils.toString(bufferedReader);
 
 							archive.putArchiveEntry(new ZipArchiveEntry("evidences/" + step.getString("seqNo").replace("-", "/") + "/" + consoleFile));
-							IOUtils.copy(consoleInStream, archive);
+							ByteArrayInputStream bytesInStream = new ByteArrayInputStream(console.getBytes("UTF-8"));
+							IOUtils.copy(bytesInStream, archive);
 							archive.closeArchiveEntry();
 
-							consoleInStream.close();
+							bufferedReader.close();
+							bytesInStream.close();
 						} catch (IOException e) {
 							// continue
 						}
@@ -745,7 +766,7 @@ public class ResultExport {
 			ZipArchiveOutputStream archive = new ZipArchiveOutputStream(byteOut);
 
 			archive.putArchiveEntry(new ZipArchiveEntry("result.json"));
-			ByteArrayInputStream bytesInStream = new ByteArrayInputStream(apiResult.getBytes());
+			ByteArrayInputStream bytesInStream = new ByteArrayInputStream(apiResult.getBytes("UTF-8"));
 			IOUtils.copy(bytesInStream, archive);
 			bytesInStream.close();
 			archive.closeArchiveEntry();
@@ -918,7 +939,7 @@ public class ResultExport {
 			template = template.replace("_step-info_", stepInfo);
 
 			archive.putArchiveEntry(new ZipArchiveEntry("index.html"));
-			ByteArrayInputStream bytesInStream = new ByteArrayInputStream(template.getBytes());
+			ByteArrayInputStream bytesInStream = new ByteArrayInputStream(template.getBytes("UTF-8"));
 			IOUtils.copy(bytesInStream, archive);
 			bytesInStream.close();
 			archive.closeArchiveEntry();
@@ -963,7 +984,7 @@ public class ResultExport {
 			fetchDiagSteps(result.getJSONArray("result"), archive, summary, config);
 
 			archive.putArchiveEntry(new ZipArchiveEntry("result.json"));
-			ByteArrayInputStream resultBIS = new ByteArrayInputStream(apiResult.getBytes());
+			ByteArrayInputStream resultBIS = new ByteArrayInputStream(apiResult.getBytes("UTF-8"));
 			IOUtils.copy(resultBIS, archive);
 			archive.closeArchiveEntry();
 			resultBIS.close();
