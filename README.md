@@ -3,7 +3,7 @@
 A desktop tool to export test results into different formats. Each test result will be exported as a file in one of the following formats:
 * `raw`: a zip file with all the evidences
 * `excel`: an Excel file with all the screenshots and parameters
-* `html`: a zip file with all the screenshots and parameters
+* `html`: a HTML file with all the screenshots and parameters in a zip package
 * `source`: a zip file with all the page HTML files
 * `diag`: a zip file with all evidences and page knowledges for diagnosis
 
