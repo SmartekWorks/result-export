@@ -231,7 +231,12 @@ public class ResultExport {
 					title = title + "(" + step.getString("typeName") + ")";
 				}
 				row = sheet.createRow(rowCnt++);
-				if (step.getBoolean("executed")) {
+
+				boolean executed = true;
+				if (step.has("executed") && !step.isNull("executed")) {
+					executed = step.getBoolean("executed");
+				}
+				if (executed) {
 					row.createCell(0).setCellValue(step.getString("seqNo"));
 					row.createCell(1).setCellValue(valueMap.get(locale + ".name"));
 					row.getCell(1).setCellStyle(titleStyle);
@@ -386,7 +391,11 @@ public class ResultExport {
 					title = title + "(" + step.getString("typeName") + ")";
 				}
 				html += "<div class=\"pure-g\"><div class=\"pure-u-1\">&nbsp;</div>";
-				if (step.getBoolean("executed")) {
+				boolean executed = true;
+				if (step.has("executed") && !step.isNull("executed")) {
+					executed = step.getBoolean("executed");
+				}
+				if (executed) {
 					html += "<div class=\"pure-u-2-24\"><div class=\"first\">" + step.getString("seqNo") + "</div></div>";
 				} else {
 					html += "<div class=\"pure-u-2-24\" style=\"background-color: grey;\"><div class=\"first\">" + step.getString("seqNo") + "</div></div>";
@@ -514,7 +523,11 @@ public class ResultExport {
 	private static void fetchDiagSteps(JSONArray steps, ZipArchiveOutputStream archive, JSONObject summary, JSONObject config) {
 		for (int i = 0; i < steps.length(); i++) {
 			JSONObject step = steps.getJSONObject(i);
-			if (step.getBoolean("executed") && "pop".equals(step.getString("type"))) {
+			boolean executed = true;
+			if (step.has("executed") && !step.isNull("executed")) {
+				executed = step.getBoolean("executed");
+			}
+			if (executed && "pop".equals(step.getString("type"))) {
 				if (step.isNull("pageCode")) {
 					lastPageCode = null;
 				} else {
