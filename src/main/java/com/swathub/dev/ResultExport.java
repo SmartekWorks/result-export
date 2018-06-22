@@ -208,7 +208,7 @@ public class ResultExport {
 				for (int j = 0; j < step.getJSONArray("paramData").length(); j++) {
 					JSONObject item = step.getJSONArray("paramData").getJSONObject(j);
 					row = sheet.createRow(rowCnt++);
-					if (item.getBoolean("runtimeEnabled")) {
+					if (!item.isNull("runtimeEnabled") && item.getBoolean("runtimeEnabled")) {
 						row.createCell(0).setCellValue(item.getString("name"));
 						row.getCell(0).setCellStyle(tableCell);
 						row.createCell(1).setCellValue(item.getString("variable"));
@@ -373,7 +373,7 @@ public class ResultExport {
 				for (int j = 0; j < step.getJSONArray("paramData").length(); j++) {
 					JSONObject item = step.getJSONArray("paramData").getJSONObject(j);
 					html += "<tr>";
-					if (item.getBoolean("runtimeEnabled")) {
+					if (!item.isNull("runtimeEnabled") && item.getBoolean("runtimeEnabled")) {
 						html += "<td>" + item.getString("name") + "</td>";
 						html += "<td>" + item.getString("variable") + "</td>";
 						html += "<td>" + item.getString("value") + "</td>";
