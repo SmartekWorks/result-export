@@ -29,7 +29,7 @@ The SWATHub API credentials are setup in this file with the following keys:
 
 * `serverUrl`: the URL of SWATHub Server URL, such as http://www.swathub.com/
 * `username`: the username of SWATHub Server
-* `apiKey`: the api key for the user, same as the key for execution node
+* `apiKey`: the api key for the user, same as the key for robot
 * `workspaceOwner`: the owner's username of the target workspace to export
 * `workspaceName`: the name of the target workspace
 * `locale`: the locale to fetch the test result, supporting `en`, `ja` and `zh_cn`
