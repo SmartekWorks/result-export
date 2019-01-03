@@ -173,22 +173,6 @@ public class ResultExport {
 		tableCell.setBorderTop(BorderStyle.THIN);
 		tableCell.setTopBorderColor(IndexedColors.BLACK.getIndex());
 
-		HSSFCellStyle cellDisabled =  workbook.createCellStyle();
-		cellDisabled.setFillForegroundColor(IndexedColors.GREY_50_PERCENT.getIndex());
-		cellDisabled.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-		cellDisabled.setBorderBottom(BorderStyle.THIN);
-		cellDisabled.setBottomBorderColor(IndexedColors.BLACK.getIndex());
-		cellDisabled.setBorderLeft(BorderStyle.THIN);
-		cellDisabled.setLeftBorderColor(IndexedColors.BLACK.getIndex());
-		cellDisabled.setBorderRight(BorderStyle.THIN);
-		cellDisabled.setRightBorderColor(IndexedColors.BLACK.getIndex());
-		cellDisabled.setBorderTop(BorderStyle.THIN);
-		cellDisabled.setTopBorderColor(IndexedColors.BLACK.getIndex());
-
-		HSSFCellStyle lineDisabled =  workbook.createCellStyle();
-		lineDisabled.setFillForegroundColor(IndexedColors.GREY_50_PERCENT.getIndex());
-		lineDisabled.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-
 		for (int i = 0; i < steps.length(); i++) {
 			JSONObject step = steps.getJSONObject(i);
 			if (step.getString("seqNo").equals("")) {
@@ -197,31 +181,26 @@ public class ResultExport {
 				row.getCell(0).setCellStyle(titleStyle);
 				row.createCell(1).setCellValue(step.getString("stepTitle"));
 
-				row = sheet.createRow(rowCnt++);
-				row.createCell(0).setCellValue(valueMap.get(locale + ".param"));
-				row.getCell(0).setCellStyle(tableHeader);
-				row.createCell(1).setCellValue(valueMap.get(locale + ".variable"));
-				row.getCell(1).setCellStyle(tableHeader);
-				row.createCell(2).setCellValue(valueMap.get(locale + ".value"));
-				row.getCell(2).setCellStyle(tableHeader);
-
-				for (int j = 0; j < step.getJSONArray("paramData").length(); j++) {
-					JSONObject item = step.getJSONArray("paramData").getJSONObject(j);
+				if (step.getJSONArray("paramData").length() > 0) {
 					row = sheet.createRow(rowCnt++);
-					if (!item.isNull("runtimeEnabled") && item.getBoolean("runtimeEnabled")) {
-						row.createCell(0).setCellValue(item.getString("name"));
-						row.getCell(0).setCellStyle(tableCell);
-						row.createCell(1).setCellValue(item.getString("variable"));
-						row.getCell(1).setCellStyle(tableCell);
-						row.createCell(2).setCellValue(item.getString("value"));
-						row.getCell(2).setCellStyle(tableCell);
-					} else {
-						row.createCell(0).setCellValue(item.getString("name"));
-						row.getCell(0).setCellStyle(cellDisabled);
-						row.createCell(1).setCellValue(item.getString("variable"));
-						row.getCell(1).setCellStyle(cellDisabled);
-						row.createCell(2).setCellValue(item.getString("value"));
-						row.getCell(2).setCellStyle(cellDisabled);
+					row.createCell(0).setCellValue(valueMap.get(locale + ".param"));
+					row.getCell(0).setCellStyle(tableHeader);
+					row.createCell(1).setCellValue(valueMap.get(locale + ".variable"));
+					row.getCell(1).setCellStyle(tableHeader);
+					row.createCell(2).setCellValue(valueMap.get(locale + ".value"));
+					row.getCell(2).setCellStyle(tableHeader);
+	
+					for (int j = 0; j < step.getJSONArray("paramData").length(); j++) {
+						JSONObject item = step.getJSONArray("paramData").getJSONObject(j);
+						if (!item.isNull("runtimeEnabled") && item.getBoolean("runtimeEnabled")) {
+							row = sheet.createRow(rowCnt++);
+							row.createCell(0).setCellValue(item.getString("name"));
+							row.getCell(0).setCellStyle(tableCell);
+							row.createCell(1).setCellValue(item.getString("variable"));
+							row.getCell(1).setCellStyle(tableCell);
+							row.createCell(2).setCellValue(item.getString("value"));
+							row.getCell(2).setCellStyle(tableCell);
+						}
 					}
 				}
 				rowCnt++;
@@ -230,28 +209,20 @@ public class ResultExport {
 				if (step.has("typeName") && !step.isNull("typeName")) {
 					title = title + "(" + step.getString("typeName") + ")";
 				}
-				row = sheet.createRow(rowCnt++);
 
 				boolean executed = true;
 				if (step.has("executed") && !step.isNull("executed")) {
 					executed = step.getBoolean("executed");
 				}
 				if (executed) {
+					row = sheet.createRow(rowCnt++);
 					row.createCell(0).setCellValue(step.getString("seqNo"));
 					row.createCell(1).setCellValue(valueMap.get(locale + ".name"));
 					row.getCell(1).setCellStyle(titleStyle);
 					row.createCell(2).setCellValue(title);
 				} else {
-					row.createCell(0).setCellValue(step.getString("seqNo"));
-					row.createCell(1).setCellValue(valueMap.get(locale + ".name"));
-					row.getCell(0).setCellStyle(lineDisabled);
-					row.createCell(2).setCellValue(title);
+					continue;
 				}
-
-				row = sheet.createRow(rowCnt++);
-				row.createCell(1).setCellValue(valueMap.get(locale + ".component.type"));
-				row.getCell(1).setCellStyle(titleStyle);
-				row.createCell(2).setCellValue(valueMap.get(locale + ".type." + step.getString("type")));
 
 				List<JSONObject> paramData = new ArrayList<JSONObject>();
 				JSONObject comment = null;
@@ -271,13 +242,6 @@ public class ResultExport {
 					row.createCell(2).setCellValue(comment.getString("value"));
 				}
 
-				if (!step.isNull("evidences") && step.getJSONObject("evidences").has("url")) {
-					row = sheet.createRow(rowCnt++);
-					row.createCell(1).setCellValue(valueMap.get(locale + ".url"));
-					row.getCell(1).setCellStyle(titleStyle);
-					row.createCell(2).setCellValue(step.getJSONObject("evidences").getString("url"));
-				}
-
 				if (!step.isNull("error")) {
 					row = sheet.createRow(rowCnt++);
 					row.createCell(1).setCellValue(valueMap.get(locale + ".result.error"));
@@ -286,30 +250,25 @@ public class ResultExport {
 					row.getCell(2).setCellStyle(errorStyle);
 				}
 
-				row = sheet.createRow(rowCnt++);
-				row.createCell(1).setCellValue(valueMap.get(locale + ".param"));
-				row.getCell(1).setCellStyle(tableHeader);
-				row.createCell(2).setCellValue(valueMap.get(locale + ".variable"));
-				row.getCell(2).setCellStyle(tableHeader);
-				row.createCell(3).setCellValue(valueMap.get(locale + ".value"));
-				row.getCell(3).setCellStyle(tableHeader);
-
-				for (JSONObject item : paramData) {
+				if (paramData.size() > 0) {
 					row = sheet.createRow(rowCnt++);
-					if (!item.isNull("runtimeEnabled") && item.getBoolean("runtimeEnabled")) {
-						row.createCell(1).setCellValue(item.getString("name"));
-						row.getCell(1).setCellStyle(tableCell);
-						row.createCell(2).setCellValue(item.getString("variable"));
-						row.getCell(2).setCellStyle(tableCell);
-						row.createCell(3).setCellValue(item.getString("value"));
-						row.getCell(3).setCellStyle(tableCell);
-					} else {
-						row.createCell(1).setCellValue(item.getString("name"));
-						row.getCell(1).setCellStyle(cellDisabled);
-						row.createCell(2).setCellValue(item.getString("variable"));
-						row.getCell(2).setCellStyle(cellDisabled);
-						row.createCell(3).setCellValue(item.getString("value"));
-						row.getCell(3).setCellStyle(cellDisabled);
+					row.createCell(1).setCellValue(valueMap.get(locale + ".param"));
+					row.getCell(1).setCellStyle(tableHeader);
+					row.createCell(2).setCellValue(valueMap.get(locale + ".variable"));
+					row.getCell(2).setCellStyle(tableHeader);
+					row.createCell(3).setCellValue(valueMap.get(locale + ".value"));
+					row.getCell(3).setCellStyle(tableHeader);
+	
+					for (JSONObject item : paramData) {
+						if (!item.isNull("runtimeEnabled") && item.getBoolean("runtimeEnabled")) {
+							row = sheet.createRow(rowCnt++);
+							row.createCell(1).setCellValue(item.getString("name"));
+							row.getCell(1).setCellStyle(tableCell);
+							row.createCell(2).setCellValue(item.getString("variable"));
+							row.getCell(2).setCellStyle(tableCell);
+							row.createCell(3).setCellValue(item.getString("value"));
+							row.getCell(3).setCellStyle(tableCell);
+						}
 					}
 				}
 
