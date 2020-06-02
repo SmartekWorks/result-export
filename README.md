@@ -84,7 +84,11 @@ The criterias to select the target test results are defined in this file. We sup
 
 ### Supported platforms
 
-Unlike SWATHub `v1.5.x` which defines all the supported platforms. In version `v1.6.0` and later, the platforms can be any combinations on your laptop, with the specific version of operation system and browsers. It is in the following format: `<OS> <OS Version> + <Browser> <Browser Version>`
+Unlike SWATHub `v1.5.x` which defines all the supported platforms. In version `v1.6.0` and later, the platforms can be any combinations on your laptop, with the specific version of operation system and browsers. It is in the following format: 
+
+```
+<OS> <OS Version> + <Browser> <Browser Version>
+```
 
 Please check out the platform of certain task just on the result page, under the `Statistics -> Platform type`. Here're some sample platforms:
 * Windows 10 + IE 11
