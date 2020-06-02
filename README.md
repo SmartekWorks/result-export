@@ -84,7 +84,7 @@ The criterias to select the target test results are defined in this file. We sup
 
 ### Supported platforms
 
-Unlike SWATHub `v1.5.x` which defines all the supported platforms. In version `v1.6.0` and later, the platforms can be any combinations on your laptop, with the specific version of operation system and browsers. It is in the following format: 
+Unlike SWATHub `v1.5.x` which defines all the supported platforms, in version `v1.6.0` and later, the platforms can be any combination on your laptop, with the specific version of operation system and browser. It is in the following format: 
 
 ```
 <OS> <OS Version> + <Browser> <Browser Version>
