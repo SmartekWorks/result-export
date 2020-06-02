@@ -75,46 +75,35 @@ The criterias to select the target test results are defined in this file. We sup
     "setID": "1",
     "tags": "tag1, tag2",
     "status": "finished",
-    "platform": "Windows 10 + Firefox",
+    "platform": "Windows 10 + Firefox 68",
     "beforeDate": "2017/08/08 14:00:00",
     "lastCount": 1
   }
 }
 ```
 
-### Available platforms
+### Supported platforms
 
-* Windows + Internet Explorer 6
-* Windows + Internet Explorer 7
-* Windows + Internet Explorer 8
-* Windows + Internet Explorer 9
-* Windows + Internet Explorer 10
-* Windows + Internet Explorer 11
-* Windows + Firefox
-* Windows + Chrome
-* Windows XP + Internet Explorer 6
-* Windows XP + Internet Explorer 7
-* Windows XP + Internet Explorer 8
-* Windows XP + Firefox
-* Windows XP + Chrome
-* Windows 7 + Internet Explorer 8
-* Windows 7 + Internet Explorer 9
-* Windows 7 + Internet Explorer 10
-* Windows 7 + Internet Explorer 11
-* Windows 7 + Firefox
-* Windows 7 + Chrome
-* Windows 8 + Internet Explorer 10
-* Windows 8 + Internet Explorer 11
-* Windows 8 + Firefox
-* Windows 8 + Chrome
-* Windows 8.1 + Internet Explorer 11
-* Windows 8.1 + Firefox
-* Windows 8.1 + Chrome
-* Windows 10 + Internet Explorer 11
-* Windows 10 + Firefox
-* Windows 10 + Chrome
-* Mac OSX + Safari
-* Mac OSX + Firefox
-* Mac OSX + Chrome
-* Linux + Firefox
-* Linux + Chrome
+Unlike SWATHub `v1.5.x` which defines all the supported platforms. In version `v1.6.0` and later, the platforms can be any combinations on your laptop, with the specific version of operation system and browsers. It is in the following format: `<OS> <OS Version> + <Browser> <Browser Version>`
+
+Please check out the platform of certain task just on the result page, under the `Statistics -> Platform type`. Here're some sample platforms:
+* Windows 10 + IE 11
+* Windows 10 + Firefox 68
+* Windows 10 + Edge 81
+* mac OS 19.3.0 + Safari 13
+* iOS 13.3 + Safari 13
+* Android 9 + Chrome 79
+
+The supported operation systems consist of:
+* Windows, XP and above
+* mac OS, 10.6 and above
+* iOS, 9 and above
+* Android, 5 and above
+
+The supported browsers consist of:
+* IE
+* Firefox
+* Chrome
+* Edge
+* Edge Legacy
+* Safari
