@@ -55,7 +55,7 @@ public class ResultExport {
 		valueMap.put("zh_cn.status.ng", "NG");
 		valueMap.put("en.scenario", "Scenario");
 		valueMap.put("en.result", "Test Result");
-		valueMap.put("en.execNode", "Execution Node");
+		valueMap.put("en.robot", "Robot");
 		valueMap.put("en.execPlatform", "Execution Platform");
 		valueMap.put("en.testServer", "Test Server");
 		valueMap.put("en.apiServer", "API Server");
@@ -73,7 +73,7 @@ public class ResultExport {
 		valueMap.put("en.url", "URL");
 		valueMap.put("ja.scenario", "シナリオ");
 		valueMap.put("ja.result", "テスト結果");
-		valueMap.put("ja.execNode", "実行ノード");
+		valueMap.put("ja.robot", "ロボット");
 		valueMap.put("ja.execPlatform", "実行プラットフォーム");
 		valueMap.put("ja.testServer", "テストサーバー");
 		valueMap.put("ja.apiServer", "APIサーバー");
@@ -91,7 +91,7 @@ public class ResultExport {
 		valueMap.put("ja.url", "URL");
 		valueMap.put("zh_cn.scenario", "测试流程");
 		valueMap.put("zh_cn.result", "执行结果");
-		valueMap.put("zh_cn.execNode", "执行节点");
+		valueMap.put("zh_cn.robot", "机器人");
 		valueMap.put("zh_cn.execPlatform", "执行平台");
 		valueMap.put("zh_cn.testServer", "测试服务器");
 		valueMap.put("zh_cn.apiServer", "API服务器");
@@ -836,9 +836,9 @@ public class ResultExport {
 			row.createCell(1).setCellValue(valueMap.get(locale + ".status." + summary.getString("status")));
 
 			row = resultSheet.createRow(rowCnt++);
-			row.createCell(0).setCellValue(valueMap.get(locale + ".execNode"));
+			row.createCell(0).setCellValue(valueMap.get(locale + ".robot"));
 			row.getCell(0).setCellStyle(titleStyle);
-			row.createCell(1).setCellValue(summary.getString("execNode"));
+			row.createCell(1).setCellValue(summary.getString("robot"));
 
 			row = resultSheet.createRow(rowCnt++);
 			row.createCell(0).setCellValue(valueMap.get(locale + ".execPlatform"));
@@ -911,8 +911,8 @@ public class ResultExport {
 			execInfo += "<div class=\"pure-u-4-24\"><div class=\"title first\">" + valueMap.get(locale + ".result") + "：</div></div>";
 			execInfo += "<div class=\"pure-u-20-24\">" + valueMap.get(locale + ".status." + summary.getString("status")) + "</div>";
 
-			execInfo += "<div class=\"pure-u-4-24\"><div class=\"title first\">" + valueMap.get(locale + ".execNode") + "：</div></div>";
-			execInfo += "<div class=\"pure-u-20-24\">" + summary.getString("execNode") + "</div>";
+			execInfo += "<div class=\"pure-u-4-24\"><div class=\"title first\">" + valueMap.get(locale + ".robot") + "：</div></div>";
+			execInfo += "<div class=\"pure-u-20-24\">" + summary.getString("robot") + "</div>";
 
 			execInfo += "<div class=\"pure-u-4-24\"><div class=\"title first\">" + valueMap.get(locale + ".execPlatform") + "：</div></div>";
 			execInfo += "<div class=\"pure-u-20-24\">" + summary.getString("execPlatform") + "</div>";
