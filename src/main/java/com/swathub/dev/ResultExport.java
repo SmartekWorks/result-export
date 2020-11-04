@@ -338,7 +338,7 @@ public class ResultExport {
 							anchor.setRow1(rowCnt);
 							HSSFPicture picture = drawing.createPicture(anchor, pictureIdx);
 							picture.resize();
-							rowCnt = picture.getPreferredSize().getRow2();
+							rowCnt = picture.getPreferredSize().getRow2() + 1;
 						} catch (IllegalArgumentException e) {
 							System.out.println("Image export error:" + imageUrl.toString());
 						}
