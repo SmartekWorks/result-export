@@ -119,6 +119,7 @@ public class ResultExport {
 				new UsernamePasswordCredentials(user, pass));
 		CloseableHttpClient httpclient = HttpClients.custom()
 				.setDefaultCredentialsProvider(credsProvider)
+				.useSystemProperties()
 				.build();
 
 		String result;

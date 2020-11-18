@@ -17,9 +17,21 @@ A desktop tool to export test results into different formats. Each test result w
 
 * `resultFormat`: type of the result format, `raw`, `excel`, `html`, `source`, or `diag`
 
-**Hint**: if the size of the test result is quite large, please adjust the JVM arguments to increase the heap size. For instance:
+#### JVM Settings
+If the size of the test result is quite large, please adjust the JVM arguments to increase the heap size. For instance:
 
 `java -Xms1024m -Xmx1024m -jar ResultExport.jar <path to config file> <resultFormat> <path to target file>`
+
+#### Proxy Settings
+If SWATHub server has to be accessed through a proxy, the proxy settings should be defined by system properties, through the following parameters:
+* `http.proxyHost`: proxy host, e.g., `10.0.0.100`.
+* `http.proxyPort`: proxy port, e.g., `8081`.
+* `http.proxyUser`: user name for proxy authentication.
+* `http.proxyPassword`: password for proxy authentication.
+
+Here's a sample command line with proxy settings:
+
+`java -Dhttp.proxyHost=10.0.0.100 -Dhttp.proxyPort=8081 -jar ResultExport.jar <path to config file> <resultFormat> <path to target file>`
 
 ### Config file
 
