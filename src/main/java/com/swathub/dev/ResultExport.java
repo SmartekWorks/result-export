@@ -5,9 +5,11 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
@@ -24,6 +26,7 @@ import javax.imageio.IIOException;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.lang.*;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -119,12 +122,28 @@ public class ResultExport {
 				new UsernamePasswordCredentials(user, pass));
 		CloseableHttpClient httpclient = HttpClients.custom()
 				.setDefaultCredentialsProvider(credsProvider)
-				.useSystemProperties()
 				.build();
 
 		String result;
 		try {
 			HttpGet httpget = new HttpGet(url.build());
+
+			String proxyHost = System.getProperty("http.proxyHost");
+			String proxyPort = System.getProperty("http.proxyPort");
+			String proxyUser = System.getProperty("http.proxyUser");
+			String proxyPassword = System.getProperty("http.proxyPassword");
+			if (proxyHost.trim().length() > 0) {
+				if (proxyUser.trim().length() > 0) {
+					credsProvider.setCredentials(
+							new AuthScope(proxyHost, Integer.parseInt(proxyPort)),
+							new UsernamePasswordCredentials(proxyUser, proxyPassword));
+				}
+				RequestConfig proxyConfig = RequestConfig.custom()
+					.setProxy(new HttpHost(proxyHost, Integer.parseInt(proxyPort)))
+					.build();
+				httpget.setConfig(proxyConfig);
+			}
+
 			CloseableHttpResponse response = httpclient.execute(httpget);
 			try {
 				result = EntityUtils.toString(response.getEntity());
