@@ -132,8 +132,8 @@ public class ResultExport {
 			String proxyPort = System.getProperty("http.proxyPort");
 			String proxyUser = System.getProperty("http.proxyUser");
 			String proxyPassword = System.getProperty("http.proxyPassword");
-			if (proxyHost.trim().length() > 0) {
-				if (proxyUser.trim().length() > 0) {
+			if (proxyHost != null && proxyHost.trim().length() > 0) {
+				if (proxyUser != null && proxyUser.trim().length() > 0) {
 					credsProvider.setCredentials(
 							new AuthScope(proxyHost, Integer.parseInt(proxyPort)),
 							new UsernamePasswordCredentials(proxyUser, proxyPassword));
