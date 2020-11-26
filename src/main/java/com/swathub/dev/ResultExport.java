@@ -28,6 +28,8 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.lang.*;
 import java.net.URL;
+import java.net.Authenticator;
+import java.net.PasswordAuthentication;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -132,8 +134,10 @@ public class ResultExport {
 			String proxyPort = System.getProperty("http.proxyPort");
 			String proxyUser = System.getProperty("http.proxyUser");
 			String proxyPassword = System.getProperty("http.proxyPassword");
-			if (proxyHost != null && proxyHost.trim().length() > 0) {
-				if (proxyUser != null && proxyUser.trim().length() > 0) {
+			if (proxyHost != null && proxyPort != null) {
+				System.setProperty("https.proxyHost", proxyHost);
+				System.setProperty("https.proxyPort", proxyPort);
+				if (proxyUser != null && proxyPassword != null) {
 					credsProvider.setCredentials(
 							new AuthScope(proxyHost, Integer.parseInt(proxyPort)),
 							new UsernamePasswordCredentials(proxyUser, proxyPassword));
@@ -1036,6 +1040,19 @@ public class ResultExport {
 		}
 	}
 
+	private static class ProxyAuthenticator extends Authenticator {
+		private String user, password;
+
+		public ProxyAuthenticator(String user, String password) {
+			this.user = user;
+			this.password = password;
+		}
+
+		protected PasswordAuthentication getPasswordAuthentication() {
+			return new PasswordAuthentication(user, password.toCharArray());
+		}
+	}
+
 	public static void main(String[] args) throws Exception {
 
 		if (args.length != 3) {
@@ -1059,6 +1076,15 @@ public class ResultExport {
 		if (!targetFile.exists() || targetFile.isDirectory()) {
 			System.out.println("Target file is not exist.");
 			return;
+		}
+
+		String proxyUser = System.getProperty("http.proxyUser");
+		String proxyPassword = System.getProperty("http.proxyPassword");
+		if (proxyUser != null && proxyPassword != null) {
+			System.setProperty("https.proxyUser", proxyUser);
+			System.setProperty("https.proxyPassword", proxyPassword);
+			System.setProperty("jdk.http.auth.tunneling.disabledSchemes", "");
+			Authenticator.setDefault(new ProxyAuthenticator(proxyUser, proxyPassword));
 		}
 
 		JSONObject config = new JSONObject(FileUtils.readFileToString(configFile, "UTF-8"));
