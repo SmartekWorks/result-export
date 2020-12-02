@@ -1101,7 +1101,9 @@ public class ResultExport {
 			URIBuilder casesUrl = new URIBuilder(config.getString("serverUrl"));
 			casesUrl.setPath(ROOT_PATH + config.getString("workspaceOwner") + "/" +
 					config.getString("workspaceName") + "/sets/" + filters.getString("setID") + "/scenarios");
-			casesUrl.addParameter("tags", filters.getString("tags"));
+			if (filters.has("tags")) {
+				casesUrl.addParameter("tags", filters.getString("tags"));
+			}
 
 			String apiResult = apiGet(casesUrl, config.getString("username"), config.getString("apiKey"));
 			if (apiResult == null || ("").equals(apiResult)) {
@@ -1109,6 +1111,14 @@ public class ResultExport {
 				return;
 			}
 			JSONArray scenarios = new JSONArray(apiResult);
+
+			List<Integer> validTestcases = new ArrayList<Integer>();
+			if (filters.has("testcaseIDs") && filters.getJSONArray("testcaseIDs").length() > 0) {
+				JSONArray cases = filters.getJSONArray("testcaseIDs");
+				for (int i = 0; i < cases.length(); i++) {
+					validTestcases.add(Integer.parseInt(cases.get(i).toString()));
+				}
+			}
 
 			for (int i = 0; i < scenarios.length(); i++) {
 				JSONObject scenario = scenarios.getJSONObject(i);
@@ -1118,12 +1128,25 @@ public class ResultExport {
 					JSONObject testcase = testcases.getJSONObject(j);
 					JSONArray results = testcase.getJSONArray("results");
 
-					String targetStatus = filters.getString("status");
+					String targetStatus = "";
+					if (filters.has("status")) {
+						targetStatus = filters.getString("status");
+					}
 
-					String targetPlatform = filters.getString("platform");
+					String targetPlatform = "";
+					if (filters.has("platform")) {
+						targetPlatform = filters.getString("platform");
+					}
+
+					if (validTestcases.size() > 0 && !validTestcases.contains(testcase.getInt("id"))) {
+						continue;
+					}
 
 					Date beforeDate = new Date();
-					String beforeDateString = filters.getString("beforeDate");
+					String beforeDateString = "";
+					if (filters.has("beforeDate")) {
+						beforeDateString = filters.getString("beforeDate");
+					}
 					if (!("").equals(beforeDateString)) {
 						DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 						dateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Tokyo"));
