@@ -1159,7 +1159,7 @@ public class ResultExport {
 
 						String status = result.getString("status");
 
-						String platform = result.getString("execPlatform");
+						String platform = result.getString("execPlatform").trim();
 
 						String timeStartString = result.getString("timeStart");
 						DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
