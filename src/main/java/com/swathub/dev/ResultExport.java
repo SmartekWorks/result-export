@@ -643,6 +643,31 @@ public class ResultExport {
 						}
 					}
 				}
+				if (step.getJSONObject("evidences").has("files")) {
+					JSONArray files = step.getJSONObject("evidences").getJSONArray("files");
+					for (int j = 0; j < files.length(); j++) {
+						String file = files.getString(j);
+						System.out.println(file);
+						if (!file.endsWith("source.xml")) {
+							continue;
+						}
+						try {
+							URL fileUrl = new URL(summary.getString("baseURL") + "/" + file);
+							BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(fileUrl.openStream(), "UTF-8"));
+							String console = IOUtils.toString(bufferedReader);
+
+							archive.putArchiveEntry(new ZipArchiveEntry("evidences/" + file));
+							ByteArrayInputStream bytesInStream = new ByteArrayInputStream(console.getBytes("UTF-8"));
+							IOUtils.copy(bytesInStream, archive);
+							archive.closeArchiveEntry();
+
+							bufferedReader.close();
+							bytesInStream.close();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
+				}
 			}
 			if (!step.isNull("error") && lastPageCode != null) {
 				try {
