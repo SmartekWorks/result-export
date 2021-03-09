@@ -161,91 +161,42 @@ public class ResultExport {
 	}
 
 	private static int fetchExcelSteps(JSONArray steps, HSSFWorkbook workbook, HSSFCreationHelper creationHelper,
-								  HSSFSheet sheet, int rowCnt, JSONObject summary, String locale) throws Exception {
+								  HSSFSheet sheet, int rowCnt, JSONObject summary, String locale, HashMap cellStyles) throws Exception {
 		HSSFRow row;
-		HSSFFont boldFont = workbook.createFont();
-		boldFont.setBold(true);
-		HSSFFont errorFont = workbook.createFont();
-		errorFont.setBold(true);
-		errorFont.setColor(IndexedColors.RED.getIndex());
-
-		HSSFCellStyle titleStyle = workbook.createCellStyle();
-		titleStyle.setFont(boldFont);
-
-		HSSFCellStyle errorStyle = workbook.createCellStyle();
-		errorStyle.setFont(errorFont);
-
-		HSSFCellStyle tableHeader = workbook.createCellStyle();
-		tableHeader.setFont(boldFont);
-		tableHeader.setAlignment(HorizontalAlignment.CENTER);
-		tableHeader.setBorderBottom(BorderStyle.THIN);
-		tableHeader.setBottomBorderColor(IndexedColors.BLACK.getIndex());
-		tableHeader.setBorderLeft(BorderStyle.THIN);
-		tableHeader.setLeftBorderColor(IndexedColors.BLACK.getIndex());
-		tableHeader.setBorderRight(BorderStyle.THIN);
-		tableHeader.setRightBorderColor(IndexedColors.BLACK.getIndex());
-		tableHeader.setBorderTop(BorderStyle.THIN);
-		tableHeader.setTopBorderColor(IndexedColors.BLACK.getIndex());
-
-		HSSFCellStyle tableCell =  workbook.createCellStyle();
-		tableCell.setBorderBottom(BorderStyle.THIN);
-		tableCell.setBottomBorderColor(IndexedColors.BLACK.getIndex());
-		tableCell.setBorderLeft(BorderStyle.THIN);
-		tableCell.setLeftBorderColor(IndexedColors.BLACK.getIndex());
-		tableCell.setBorderRight(BorderStyle.THIN);
-		tableCell.setRightBorderColor(IndexedColors.BLACK.getIndex());
-		tableCell.setBorderTop(BorderStyle.THIN);
-		tableCell.setTopBorderColor(IndexedColors.BLACK.getIndex());
-
-		HSSFCellStyle cellDisabled =  workbook.createCellStyle();
-		cellDisabled.setFillForegroundColor(IndexedColors.GREY_50_PERCENT.getIndex());
-		cellDisabled.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-		cellDisabled.setBorderBottom(BorderStyle.THIN);
-		cellDisabled.setBottomBorderColor(IndexedColors.BLACK.getIndex());
-		cellDisabled.setBorderLeft(BorderStyle.THIN);
-		cellDisabled.setLeftBorderColor(IndexedColors.BLACK.getIndex());
-		cellDisabled.setBorderRight(BorderStyle.THIN);
-		cellDisabled.setRightBorderColor(IndexedColors.BLACK.getIndex());
-		cellDisabled.setBorderTop(BorderStyle.THIN);
-		cellDisabled.setTopBorderColor(IndexedColors.BLACK.getIndex());
-
-		HSSFCellStyle lineDisabled =  workbook.createCellStyle();
-		lineDisabled.setFillForegroundColor(IndexedColors.GREY_50_PERCENT.getIndex());
-		lineDisabled.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 
 		for (int i = 0; i < steps.length(); i++) {
 			JSONObject step = steps.getJSONObject(i);
 			if (step.getString("seqNo").equals("")) {
 				row = sheet.createRow(rowCnt++);
 				row.createCell(0).setCellValue(valueMap.get(locale + ".case"));
-				row.getCell(0).setCellStyle(titleStyle);
+				row.getCell(0).setCellStyle((HSSFCellStyle)cellStyles.get("titleStyle"));
 				row.createCell(1).setCellValue(step.getString("stepTitle"));
 
 				row = sheet.createRow(rowCnt++);
 				row.createCell(0).setCellValue(valueMap.get(locale + ".param"));
-				row.getCell(0).setCellStyle(tableHeader);
+				row.getCell(0).setCellStyle((HSSFCellStyle)cellStyles.get("tableHeader"));
 				row.createCell(1).setCellValue(valueMap.get(locale + ".variable"));
-				row.getCell(1).setCellStyle(tableHeader);
+				row.getCell(1).setCellStyle((HSSFCellStyle)cellStyles.get("tableHeader"));
 				row.createCell(2).setCellValue(valueMap.get(locale + ".value"));
-				row.getCell(2).setCellStyle(tableHeader);
+				row.getCell(2).setCellStyle((HSSFCellStyle)cellStyles.get("tableHeader"));
 
 				for (int j = 0; j < step.getJSONArray("paramData").length(); j++) {
 					JSONObject item = step.getJSONArray("paramData").getJSONObject(j);
 					row = sheet.createRow(rowCnt++);
 					if (!item.isNull("runtimeEnabled") && item.getBoolean("runtimeEnabled")) {
 						row.createCell(0).setCellValue(item.getString("name"));
-						row.getCell(0).setCellStyle(tableCell);
+						row.getCell(0).setCellStyle((HSSFCellStyle)cellStyles.get("tableCell"));
 						row.createCell(1).setCellValue(item.getString("variable"));
-						row.getCell(1).setCellStyle(tableCell);
+						row.getCell(1).setCellStyle((HSSFCellStyle)cellStyles.get("tableCell"));
 						row.createCell(2).setCellValue(item.getString("value"));
-						row.getCell(2).setCellStyle(tableCell);
+						row.getCell(2).setCellStyle((HSSFCellStyle)cellStyles.get("tableCell"));
 					} else {
 						row.createCell(0).setCellValue(item.getString("name"));
-						row.getCell(0).setCellStyle(cellDisabled);
+						row.getCell(0).setCellStyle((HSSFCellStyle)cellStyles.get("cellDisabled"));
 						row.createCell(1).setCellValue(item.getString("variable"));
-						row.getCell(1).setCellStyle(cellDisabled);
+						row.getCell(1).setCellStyle((HSSFCellStyle)cellStyles.get("cellDisabled"));
 						row.createCell(2).setCellValue(item.getString("value"));
-						row.getCell(2).setCellStyle(cellDisabled);
+						row.getCell(2).setCellStyle((HSSFCellStyle)cellStyles.get("cellDisabled"));
 					}
 				}
 				rowCnt++;
@@ -263,18 +214,18 @@ public class ResultExport {
 				if (executed) {
 					row.createCell(0).setCellValue(step.getString("seqNo"));
 					row.createCell(1).setCellValue(valueMap.get(locale + ".name"));
-					row.getCell(1).setCellStyle(titleStyle);
+					row.getCell(1).setCellStyle((HSSFCellStyle)cellStyles.get("titleStyle"));
 					row.createCell(2).setCellValue(title);
 				} else {
 					row.createCell(0).setCellValue(step.getString("seqNo"));
 					row.createCell(1).setCellValue(valueMap.get(locale + ".name"));
-					row.getCell(0).setCellStyle(lineDisabled);
+					row.getCell(0).setCellStyle((HSSFCellStyle)cellStyles.get("lineDisabled"));
 					row.createCell(2).setCellValue(title);
 				}
 
 				row = sheet.createRow(rowCnt++);
 				row.createCell(1).setCellValue(valueMap.get(locale + ".component.type"));
-				row.getCell(1).setCellStyle(titleStyle);
+				row.getCell(1).setCellStyle((HSSFCellStyle)cellStyles.get("titleStyle"));
 				row.createCell(2).setCellValue(valueMap.get(locale + ".type." + step.getString("type")));
 
 				List<JSONObject> paramData = new ArrayList<JSONObject>();
@@ -291,49 +242,49 @@ public class ResultExport {
 				if (comment != null) {
 					row = sheet.createRow(rowCnt++);
 					row.createCell(1).setCellValue(valueMap.get(locale + ".comment"));
-					row.getCell(1).setCellStyle(titleStyle);
+					row.getCell(1).setCellStyle((HSSFCellStyle)cellStyles.get("titleStyle"));
 					row.createCell(2).setCellValue(comment.getString("value"));
 				}
 
 				if (!step.isNull("evidences") && step.getJSONObject("evidences").has("url")) {
 					row = sheet.createRow(rowCnt++);
 					row.createCell(1).setCellValue(valueMap.get(locale + ".url"));
-					row.getCell(1).setCellStyle(titleStyle);
+					row.getCell(1).setCellStyle((HSSFCellStyle)cellStyles.get("titleStyle"));
 					row.createCell(2).setCellValue(step.getJSONObject("evidences").getString("url"));
 				}
 
 				if (!step.isNull("error")) {
 					row = sheet.createRow(rowCnt++);
 					row.createCell(1).setCellValue(valueMap.get(locale + ".result.error"));
-					row.getCell(1).setCellStyle(titleStyle);
+					row.getCell(1).setCellStyle((HSSFCellStyle)cellStyles.get("titleStyle"));
 					row.createCell(2).setCellValue(step.getString("error"));
-					row.getCell(2).setCellStyle(errorStyle);
+					row.getCell(2).setCellStyle((HSSFCellStyle)cellStyles.get("errorStyle"));
 				}
 
 				row = sheet.createRow(rowCnt++);
 				row.createCell(1).setCellValue(valueMap.get(locale + ".param"));
-				row.getCell(1).setCellStyle(tableHeader);
+				row.getCell(1).setCellStyle((HSSFCellStyle)cellStyles.get("tableHeader"));
 				row.createCell(2).setCellValue(valueMap.get(locale + ".variable"));
-				row.getCell(2).setCellStyle(tableHeader);
+				row.getCell(2).setCellStyle((HSSFCellStyle)cellStyles.get("tableHeader"));
 				row.createCell(3).setCellValue(valueMap.get(locale + ".value"));
-				row.getCell(3).setCellStyle(tableHeader);
+				row.getCell(3).setCellStyle((HSSFCellStyle)cellStyles.get("tableHeader"));
 
 				for (JSONObject item : paramData) {
 					row = sheet.createRow(rowCnt++);
 					if (!item.isNull("runtimeEnabled") && item.getBoolean("runtimeEnabled")) {
 						row.createCell(1).setCellValue(item.getString("name"));
-						row.getCell(1).setCellStyle(tableCell);
+						row.getCell(1).setCellStyle((HSSFCellStyle)cellStyles.get("tableCell"));
 						row.createCell(2).setCellValue(item.getString("variable"));
-						row.getCell(2).setCellStyle(tableCell);
+						row.getCell(2).setCellStyle((HSSFCellStyle)cellStyles.get("tableCell"));
 						row.createCell(3).setCellValue(item.getString("value"));
-						row.getCell(3).setCellStyle(tableCell);
+						row.getCell(3).setCellStyle((HSSFCellStyle)cellStyles.get("tableCell"));
 					} else {
 						row.createCell(1).setCellValue(item.getString("name"));
-						row.getCell(1).setCellStyle(cellDisabled);
+						row.getCell(1).setCellStyle((HSSFCellStyle)cellStyles.get("cellDisabled"));
 						row.createCell(2).setCellValue(item.getString("variable"));
-						row.getCell(2).setCellStyle(cellDisabled);
+						row.getCell(2).setCellStyle((HSSFCellStyle)cellStyles.get("cellDisabled"));
 						row.createCell(3).setCellValue(item.getString("value"));
-						row.getCell(3).setCellStyle(cellDisabled);
+						row.getCell(3).setCellStyle((HSSFCellStyle)cellStyles.get("cellDisabled"));
 					}
 				}
 
@@ -372,7 +323,7 @@ public class ResultExport {
 				rowCnt++;
 			}
 
-			rowCnt = fetchExcelSteps(step.getJSONArray("steps"), workbook, creationHelper, sheet, rowCnt, summary, locale);
+			rowCnt = fetchExcelSteps(step.getJSONArray("steps"), workbook, creationHelper, sheet, rowCnt, summary, locale, cellStyles);
 		}
 
 		return rowCnt;
@@ -854,13 +805,8 @@ public class ResultExport {
 
 			HSSFSheet resultSheet = workbook.createSheet("Result");
 
-			// set basic information
-			int rowCnt = 0;
-
-			resultSheet.setColumnWidth(0, 4500);
-			resultSheet.setColumnWidth(1, 4500);
-			resultSheet.setColumnWidth(2, 4500);
-			resultSheet.setColumnWidth(3, 4500);
+			// create cell styles
+			HashMap<String, HSSFCellStyle> cellStyles = new HashMap<String, HSSFCellStyle>();
 
 			HSSFFont boldFont = workbook.createFont();
 			boldFont.setBold(true);
@@ -870,9 +816,61 @@ public class ResultExport {
 
 			HSSFCellStyle titleStyle = workbook.createCellStyle();
 			titleStyle.setFont(boldFont);
+			cellStyles.put("titleStyle", titleStyle);
 
 			HSSFCellStyle errorStyle = workbook.createCellStyle();
 			errorStyle.setFont(errorFont);
+			cellStyles.put("errorStyle", errorStyle);
+
+			HSSFCellStyle tableHeader = workbook.createCellStyle();
+			tableHeader.setFont(boldFont);
+			tableHeader.setAlignment(HorizontalAlignment.CENTER);
+			tableHeader.setBorderBottom(BorderStyle.THIN);
+			tableHeader.setBottomBorderColor(IndexedColors.BLACK.getIndex());
+			tableHeader.setBorderLeft(BorderStyle.THIN);
+			tableHeader.setLeftBorderColor(IndexedColors.BLACK.getIndex());
+			tableHeader.setBorderRight(BorderStyle.THIN);
+			tableHeader.setRightBorderColor(IndexedColors.BLACK.getIndex());
+			tableHeader.setBorderTop(BorderStyle.THIN);
+			tableHeader.setTopBorderColor(IndexedColors.BLACK.getIndex());
+			cellStyles.put("tableHeader", tableHeader);
+
+			HSSFCellStyle tableCell =  workbook.createCellStyle();
+			tableCell.setBorderBottom(BorderStyle.THIN);
+			tableCell.setBottomBorderColor(IndexedColors.BLACK.getIndex());
+			tableCell.setBorderLeft(BorderStyle.THIN);
+			tableCell.setLeftBorderColor(IndexedColors.BLACK.getIndex());
+			tableCell.setBorderRight(BorderStyle.THIN);
+			tableCell.setRightBorderColor(IndexedColors.BLACK.getIndex());
+			tableCell.setBorderTop(BorderStyle.THIN);
+			tableCell.setTopBorderColor(IndexedColors.BLACK.getIndex());
+			cellStyles.put("tableCell", tableCell);
+
+			HSSFCellStyle cellDisabled =  workbook.createCellStyle();
+			cellDisabled.setFillForegroundColor(IndexedColors.GREY_50_PERCENT.getIndex());
+			cellDisabled.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+			cellDisabled.setBorderBottom(BorderStyle.THIN);
+			cellDisabled.setBottomBorderColor(IndexedColors.BLACK.getIndex());
+			cellDisabled.setBorderLeft(BorderStyle.THIN);
+			cellDisabled.setLeftBorderColor(IndexedColors.BLACK.getIndex());
+			cellDisabled.setBorderRight(BorderStyle.THIN);
+			cellDisabled.setRightBorderColor(IndexedColors.BLACK.getIndex());
+			cellDisabled.setBorderTop(BorderStyle.THIN);
+			cellDisabled.setTopBorderColor(IndexedColors.BLACK.getIndex());
+			cellStyles.put("cellDisabled", cellDisabled);
+
+			HSSFCellStyle lineDisabled =  workbook.createCellStyle();
+			lineDisabled.setFillForegroundColor(IndexedColors.GREY_50_PERCENT.getIndex());
+			lineDisabled.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+			cellStyles.put("lineDisabled", lineDisabled);
+
+			// set basic information
+			int rowCnt = 0;
+
+			resultSheet.setColumnWidth(0, 4500);
+			resultSheet.setColumnWidth(1, 4500);
+			resultSheet.setColumnWidth(2, 4500);
+			resultSheet.setColumnWidth(3, 4500);
 
 			HSSFRow row = resultSheet.createRow(rowCnt++);
 			row.createCell(0).setCellValue(valueMap.get(locale + ".scenario"));
@@ -940,7 +938,7 @@ public class ResultExport {
 
 			rowCnt ++;
 
-			fetchExcelSteps(result.getJSONArray("result"), workbook, creationHelper, resultSheet, rowCnt, summary, locale);
+			fetchExcelSteps(result.getJSONArray("result"), workbook, creationHelper, resultSheet, rowCnt, summary, locale, cellStyles);
 
 			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 			workbook.write(outputStream);
