@@ -1,4 +1,4 @@
-##  Result Export Tool
+##  SWATHub Result Export Tool
 
 A desktop tool to export test results into different formats. Each test result will be exported as a file in one of the following formats:
 * `raw`: a zip file with all the evidences
