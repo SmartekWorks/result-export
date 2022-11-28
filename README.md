@@ -6,6 +6,7 @@ A desktop tool to export test results into different formats. Each test result w
 * `html`: a HTML file with all the screenshots and parameters in a zip package
 * `source`: a zip file with all the page HTML files
 * `diag`: a zip file with all evidences and page knowledges for diagnosis
+* `junit`: a xml file in JUnit format
 
 ### Build
 
@@ -62,7 +63,7 @@ The SWATHub API credentials are setup in this file with the following keys:
 ### Target file
 
 The criterias to select the target test results are defined in this file. We support two kinds of selection:
-* `By ids`: the unique ID(s) of test results are defined 
+* `By ids`: the unique ID(s) of test results are defined
 * `By filter`: test set level options are provided to fetch required test restuls
 
 #### Parameters
@@ -72,10 +73,10 @@ The criterias to select the target test results are defined in this file. We sup
 **Note** : the following parameters will be ignored if the `ids` list is not empty.
 
 * `lastCount`(mandatory): the result index (positive integer) in all the results meeting the filters below for any single test case. For instance, `1` means the latest result, and `2` means the one before the latest.
-* `setID`(mandatory): the unique ID (string) of the test set in the target workspace, which can be got from the test set url. For instance, the set ID is **"9"** in the url `http://swathub.com/app/support/samples/scenarios/set/9`. 
+* `setID`(mandatory): the unique ID (string) of the test set in the target workspace, which can be got from the test set url. For instance, the set ID is **"9"** in the url `http://swathub.com/app/support/samples/scenarios/set/9`.
 * `testcaseIDs`(optional): the list of test case IDs to filter the results. Only results belonging to these test cases will be exported.
-* `tags`(optional): tags filtering the scenarios to export, separated by comma. 
-* `platform`(optional): the platform to export. It means any platform if the value is an empty string. 
+* `tags`(optional): tags filtering the scenarios to export, separated by comma.
+* `platform`(optional): the platform to export. It means any platform if the value is an empty string.
 * `status`(optional): the status of the result to export, `finished`, `failed`, `ok` or `ng`. It means any status if the value is an empty string.
 * `beforeDate`(optional): the date when results generated before, in the format of `YYYY/MM/DD hh:mm:ss`. It means now if the value is an empty string. Please be noted the timezone of `beforeDate` is Asia/Tokyo.
 
@@ -98,7 +99,7 @@ The criterias to select the target test results are defined in this file. We sup
 
 ### Supported platforms
 
-Unlike SWATHub `v1.5.x` which defines all the supported platforms, in version `v1.6.0` and later, the platforms can be any combination on your laptop, with the specific version of operation system and browser. It is in the following format: 
+Unlike SWATHub `v1.5.x` which defines all the supported platforms, in version `v1.6.0` and later, the platforms can be any combination on your laptop, with the specific version of operation system and browser. It is in the following format:
 
 ```
 <OS> <OS Version> + <Browser> <Browser Version>

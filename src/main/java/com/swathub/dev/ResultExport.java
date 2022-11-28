@@ -21,9 +21,9 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.hssf.usermodel.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
-import javax.imageio.IIOException;
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.lang.*;
@@ -33,6 +33,14 @@ import java.net.PasswordAuthentication;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import javax.imageio.IIOException;
+import javax.imageio.ImageIO;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.*;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 public class ResultExport {
 	private static Map<String, String> valueMap = new HashMap<String, String>();
@@ -116,6 +124,8 @@ public class ResultExport {
 	private static String ROOT_PATH = "/api/";
 
 	private static String lastPageCode = null;
+
+	private static String setName = "SCENARIO GROUP";
 
 	private static String apiGet(URIBuilder url, String user, String pass) throws Exception {
 		CredentialsProvider credsProvider = new BasicCredentialsProvider();
@@ -774,6 +784,8 @@ public class ResultExport {
 
 		JSONObject result = new JSONObject(apiResult);
 		JSONObject summary = result.getJSONObject("summary");
+		String filename = (summary.getString("scenarioName") +	"-" + summary.getString("caseName") + "-" + resultId)
+			.replace(" ", "_").replace("/", "_").replace(":", "_").replace("?", "_").replace("*", "_").replace("\"", "_").replace("<", "_").replace(">", "_").replace("|", "_");
 		if ("raw".equals(format)) {
 			ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
 			ZipArchiveOutputStream archive = new ZipArchiveOutputStream(byteOut);
@@ -791,8 +803,7 @@ public class ResultExport {
 			archive.close();
 
 			byteOut.flush();
-			FileOutputStream fop = new FileOutputStream("raw-" + summary.getString("scenarioName") +
-					"-" + summary.getString("caseName") + "-" + resultId + ".zip");
+			FileOutputStream fop = new FileOutputStream("raw-" + filename + ".zip");
 			byteOut.writeTo(fop);
 			byteOut.close();
 			fop.close();
@@ -943,8 +954,7 @@ public class ResultExport {
 			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 			workbook.write(outputStream);
 
-			FileUtils.writeByteArrayToFile(new File(summary.getString("scenarioName") +
-					"-" + summary.getString("caseName") + "-" + resultId + ".xls"), outputStream.toByteArray());
+			FileUtils.writeByteArrayToFile(new File(filename + ".xls"), outputStream.toByteArray());
 			outputStream.close();
 			System.out.println("Excel file is created. Result ID:" + resultId);
 		} else if ("html".equals(format)) {
@@ -1014,8 +1024,7 @@ public class ResultExport {
 			archive.close();
 
 			byteOut.flush();
-			FileOutputStream fop = new FileOutputStream("html-" + summary.getString("scenarioName") +
-					"-" + summary.getString("caseName") + "-" + resultId + ".zip");
+			FileOutputStream fop = new FileOutputStream("html-" + filename + ".zip");
 			byteOut.writeTo(fop);
 			byteOut.close();
 			fop.close();
@@ -1031,8 +1040,7 @@ public class ResultExport {
 			archive.close();
 
 			byteOut.flush();
-			FileOutputStream fop = new FileOutputStream("source-" + summary.getString("scenarioName") +
-					"-" + summary.getString("caseName") + "-" + resultId + ".zip");
+			FileOutputStream fop = new FileOutputStream("source-" + filename + ".zip");
 			byteOut.writeTo(fop);
 			byteOut.close();
 			fop.close();
@@ -1054,12 +1062,40 @@ public class ResultExport {
 			archive.close();
 			byteOut.flush();
 
-			FileOutputStream fop = new FileOutputStream("diag-" + summary.getString("scenarioName") +
-					"-" + summary.getString("caseName") + "-" + resultId + ".zip");
+			FileOutputStream fop = new FileOutputStream("diag-" + filename + ".zip");
 			byteOut.writeTo(fop);
 			byteOut.close();
 			fop.close();
 			System.out.println("Diagnosis zip file is created. Result ID:" + resultId);
+		} else if ("junit".equals(format)) {
+			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+			Document doc = docBuilder.newDocument();
+			Element testsuites = doc.createElement("testsuites");
+			testsuites.setAttribute("name", "Report");
+			testsuites.setAttribute("tests", "1");
+			doc.appendChild(testsuites);
+			Element testsuite = doc.createElement("testsuite");
+			testsuite.setAttribute("name", setName);
+			testsuite.setAttribute("tests", "1");
+			testsuites.appendChild(testsuite);
+			Element testcase = doc.createElement("testcase");
+			testcase.setAttribute("id", resultId);
+			testcase.setAttribute("name", summary.getString("scenarioName") + "-" + summary.getString("caseName"));
+			testcase.setAttribute("status", summary.getString("status"));
+			testcase.setAttribute("time", "" + summary.getDouble("duration"));
+			testsuite.appendChild(testcase);
+			if ("failed".equals(summary.getString("status")) || "ng".equals(summary.getString("status"))) {
+				Element failure = doc.createElement("failure");
+				failure.setAttribute("message", summary.getString("error"));
+				testcase.appendChild(failure);
+			}
+			TransformerFactory transformerFactory = TransformerFactory.newInstance();
+			Transformer transformer = transformerFactory.newTransformer();
+			DOMSource source = new DOMSource(doc);
+			StreamResult sr = new StreamResult(new File(filename + ".xml"));
+			transformer.transform(source, sr);
+			System.out.println("JUnit xml file is created. Result ID:" + resultId);
 		}
 	}
 
@@ -1090,8 +1126,8 @@ public class ResultExport {
 		}
 
 		String format = args[1];
-		if (!"excel".equals(format) && !"html".equals(format) && !"diag".equals(format) && !"raw".equals(format)) {
-			System.out.println("Format must be one of the following: excel, html, diag, raw");
+		if (!"excel".equals(format) && !"html".equals(format) && !"diag".equals(format) && !"raw".equals(format) && !"junit".equals(format)) {
+			System.out.println("Format must be one of the following: excel, html, diag, raw, junit");
 			return;
 		}
 
@@ -1121,6 +1157,18 @@ public class ResultExport {
 				validResults.add(ids.get(i).toString());
 			}
 		} else {
+			URIBuilder setUrl = new URIBuilder(config.getString("serverUrl"));
+			setUrl.setPath(ROOT_PATH + config.getString("workspaceOwner") + "/" +
+					config.getString("workspaceName") + "/sets/" + filters.getString("setID"));
+
+			String apiResult = apiGet(setUrl, config.getString("username"), config.getString("apiKey"));
+			if (apiResult == null || ("").equals(apiResult)) {
+				System.out.println("Config file is not correct, set can't be fetched.");
+				return;
+			}
+			JSONObject set = new JSONObject(apiResult);
+			setName = set.getString("name");
+
 			URIBuilder casesUrl = new URIBuilder(config.getString("serverUrl"));
 			casesUrl.setPath(ROOT_PATH + config.getString("workspaceOwner") + "/" +
 					config.getString("workspaceName") + "/sets/" + filters.getString("setID") + "/scenarios");
@@ -1128,9 +1176,9 @@ public class ResultExport {
 				casesUrl.addParameter("tags", filters.getString("tags"));
 			}
 
-			String apiResult = apiGet(casesUrl, config.getString("username"), config.getString("apiKey"));
+			apiResult = apiGet(casesUrl, config.getString("username"), config.getString("apiKey"));
 			if (apiResult == null || ("").equals(apiResult)) {
-				System.out.println("Config file is not correct.");
+				System.out.println("Config file is not correct, cases can't be fetched.");
 				return;
 			}
 			JSONArray scenarios = new JSONArray(apiResult);
