@@ -1167,7 +1167,7 @@ public class ResultExport {
 				return;
 			}
 			JSONObject set = new JSONObject(apiResult);
-			setName = set.getString("name");
+			setName = config.getString("workspaceName") + " " + set.getString("name");
 
 			URIBuilder casesUrl = new URIBuilder(config.getString("serverUrl"));
 			casesUrl.setPath(ROOT_PATH + config.getString("workspaceOwner") + "/" +
